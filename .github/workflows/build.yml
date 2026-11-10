@@ -1,0 +1,31 @@
+name: Bouwen en testen
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: pip install -r requirements.txt
+      - name: Scraper testen op lokale kopie
+        run: python scripts/scrape_catalogus.py --file tests/fixtures/Borst.html --dataset Borst --out /tmp/borst.json
+      - name: Pagina bouwen
+        run: python scripts/build.py
+      - name: Syntax en tests
+        run: |
+          node --check dist/app.js
+          node --test tests/*.test.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aanvraagbouwer
+          path: dist/index.html
