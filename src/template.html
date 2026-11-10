@@ -1,0 +1,512 @@
+<title>Nieuwe NKR-aanvraag</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: IKNL-formulierstijl. Links de keuzes (formulier), rechts live uitvoer in tabbladen; op telefoon onder elkaar. */
+:root{
+  --bg:#ffffff; --surface:#F3F8FA; --line:#B3D3DD; --line-soft:#DCEBF0;
+  --ink:#1B3A47; --muted:#4F6B75; --brand:#006D8C; --brand-ink:#ffffff; --accent:#11B5E9; --accent-soft:#E3F5FC; --accent-ink:#004A60;
+  --tok-bg:#EAF4F7; --tok-fg:#005A73; --code-bg:#0F2A33; --code-fg:#D8ECF2;
+  --ok-bg:#E3F2E8; --ok-fg:#1E5E3A; --wn-bg:#FFF4DD; --wn-fg:#5C3A00; --bad-bg:#FDE7E4; --bad-fg:#8A1F12;
+  --f-body:'Nunito Sans','Avenir Next','Avenir',Arial,sans-serif; --f-mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1B20; --surface:#14262D; --line:#2E4D58; --line-soft:#21363E; --ink:#DCEBF0; --muted:#9DB8C1; --brand:#5CC6E3; --brand-ink:#05242E; --accent:#11B5E9; --accent-soft:#123845; --accent-ink:#BFEAF7;
+  --tok-bg:#1B3540; --tok-fg:#A9DDEC; --code-bg:#08151A; --code-fg:#D8ECF2;
+  --ok-bg:#16352A; --ok-fg:#A8DDBE; --wn-bg:#3A2D12; --wn-fg:#F3D59A; --bad-bg:#3D1C18; --bad-fg:#F4B4A9; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1B20; --surface:#14262D; --line:#2E4D58; --line-soft:#21363E; --ink:#DCEBF0; --muted:#9DB8C1; --brand:#5CC6E3; --brand-ink:#05242E; --accent:#11B5E9; --accent-soft:#123845; --accent-ink:#BFEAF7;
+  --tok-bg:#1B3540; --tok-fg:#A9DDEC; --code-bg:#08151A; --code-fg:#D8ECF2;
+  --ok-bg:#16352A; --ok-fg:#A8DDBE; --wn-bg:#3A2D12; --wn-fg:#F3D59A; --bad-bg:#3D1C18; --bad-fg:#F4B4A9; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--f-body)}
+.wrap{max-width:1360px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{border-bottom:1px solid var(--line-soft)}
+header.top .wrap{padding-block:18px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:baseline;justify-content:space-between}
+.brand{font-size:22px;font-weight:800;color:var(--brand);margin:0}
+.sub{color:var(--muted);margin:0;font-size:14px}
+.banner{background:var(--accent-soft);color:var(--accent-ink);border-bottom:1px solid var(--line-soft)}
+.banner .wrap{padding-block:10px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:14px}
+main.wrap{padding-block:24px 48px;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.left{flex:1 1 520px;min-width:0;display:flex;flex-direction:column;gap:22px}
+.right{flex:1 1 560px;min-width:0;position:sticky;top:env(safe-area-inset-top,0px);display:flex;flex-direction:column;gap:12px}
+@media (max-width:1100px){.right{position:static}}
+h2{font-size:20px;font-weight:800;color:var(--brand);margin:0;text-wrap:balance}
+.sec{display:flex;flex-direction:column;gap:14px;padding-bottom:22px;border-bottom:1px solid var(--line-soft)}
+.sec:last-child{border-bottom:0}
+.row{display:flex;flex-wrap:wrap;gap:14px 24px}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.lbl{font-weight:800;color:var(--brand);font-size:15px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hint{color:var(--muted);font-size:13px;margin:0}
+input[type=text],input[type=number],select,textarea{font:400 15px var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:9px 11px;min-height:42px;max-width:100%}
+textarea{min-height:64px;resize:vertical;width:100%}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.chip{font:600 14px var(--f-body);min-height:40px;padding:0 13px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--brand);cursor:pointer}
+.seg button[aria-pressed="true"],.chip[aria-pressed="true"]{background:var(--accent-soft);border:2px solid var(--accent);color:var(--accent-ink)}
+.tok{font:500 12px var(--f-mono);background:var(--tok-bg);color:var(--tok-fg);border-radius:3px;padding:2px 6px;white-space:nowrap}
+.pill{font:700 11px var(--f-body);letter-spacing:.04em;text-transform:uppercase;border-radius:3px;padding:2px 7px;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok-fg)} .pill.wn{background:var(--wn-bg);color:var(--wn-fg)} .pill.bad{background:var(--bad-bg);color:var(--bad-fg)}
+.btn{font:600 15px var(--f-body);min-height:42px;padding:0 18px;border-radius:4px;border:1px solid var(--brand);background:var(--brand);color:var(--brand-ink);cursor:pointer}
+.btn.ghost{background:var(--bg);color:var(--brand);border-color:var(--line)}
+a{color:var(--brand)}
+/* variabelenkiezer */
+.picker{border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column}
+.picker-head{display:flex;flex-wrap:wrap;gap:8px;padding:10px;border-bottom:1px solid var(--line-soft);background:var(--surface)}
+.picker-head input{flex:1 1 200px}
+.vlist{max-height:420px;overflow:auto}
+.v{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;padding:8px 12px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.v:hover{background:var(--surface)}
+.v input{margin-top:4px;width:18px;height:18px;accent-color:var(--brand)}
+.v .nm{font:500 13px var(--f-mono);color:var(--tok-fg)}
+.v .lb{font-size:14px}
+.v .cat{font-size:12px;color:var(--muted)}
+.picker-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);font-size:14px}
+/* uitvoer */
+.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:2px solid var(--line-soft)}
+.tabs button{font:700 14px var(--f-body);background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 12px;color:var(--muted);cursor:pointer;min-height:44px}
+.tabs button[aria-selected="true"]{color:var(--brand);border-bottom-color:var(--accent)}
+.panel{border:1px solid var(--line);border-radius:4px;background:var(--bg);min-width:0}
+.panel-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line-soft);background:var(--surface)}
+.panel-bar p{margin:0;font-size:13px;color:var(--muted)}
+pre.out{margin:0;padding:14px 16px;background:var(--code-bg);color:var(--code-fg);font:400 12.5px/1.55 var(--f-mono);white-space:pre-wrap;word-break:break-word;max-height:68vh;overflow:auto;border-radius:0 0 4px 4px}
+.sum{padding:16px;display:flex;flex-direction:column;gap:16px}
+.pico{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 12px;align-items:start}
+.pl{width:26px;height:26px;border-radius:4px;background:var(--brand);color:var(--brand-ink);font-weight:800;display:flex;align-items:center;justify-content:center}
+.pico p{margin:0}
+.chk{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.chk li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:start;font-size:14px}
+.stat{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;color:var(--muted)}
+.stat b{color:var(--ink);font-variant-numeric:tabular-nums}
+.count{padding:18px;display:flex;flex-direction:column;gap:14px}
+.big{font-size:34px;font-weight:800;color:var(--brand);line-height:1.1;font-variant-numeric:tabular-nums}
+table.dim{border-collapse:collapse;width:100%;font-size:14px}
+table.dim th,table.dim td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.toast{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--brand);color:var(--brand-ink);padding:10px 16px;border-radius:4px;font-weight:700}
+.vis{position:absolute;left:-9999px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top"><div class="wrap">
+  <div><p class="brand">Nieuwe NKR-aanvraag</p><p class="sub">Prototype · van keuzes in de NKR-datacatalogus naar een aanvraagspecificatie en een prompt voor het SAS-basisscript</p></div>
+  <div class="seg"><button type="button" class="btn ghost" id="btn-voorbeeld">Voorbeeld 26-01697 laden</button><button type="button" class="btn ghost" id="btn-leeg">Alles wissen</button></div>
+</div></header>
+<div class="banner" id="banner" hidden><div class="wrap"><span class="pill ok">Voorbeeld</span><span id="banner-txt">Voorbeeld geladen: aanvraag 26-01697. Met ‘Alles wissen’ begint u weer leeg.</span></div></div>
+
+<main class="wrap">
+<section class="left" aria-label="Keuzes">
+
+  <div class="sec">
+    <h2>Aanvraag</h2>
+    <div class="row">
+      <div class="fld"><span class="lbl">Type aanvraag</span>
+        <div class="seg" data-key="type"><button type="button" data-v="nieuw">Nieuw</button><button type="button" data-v="update">Update van eerdere aanvraag</button></div></div>
+      <div class="fld" id="fld-vorige"><label class="lbl" for="vorige">Eerder aanvraagnummer</label><input type="text" id="vorige" placeholder="bijv. 25-01377" style="width:160px"></div>
+    </div>
+    <div class="row">
+      <div class="fld"><label class="lbl" for="aanvraagnr">Aanvraagnummer</label><input type="text" id="aanvraagnr" placeholder="toegekend door IKNL" style="width:180px"></div>
+      <div class="fld"><span class="lbl">Gebruik</span>
+        <div class="seg" data-key="doel"><button type="button" data-v="onderzoek">Wetenschappelijk onderzoek</button><button type="button" data-v="statistiek">Statistiek</button></div></div>
+    </div>
+    <div class="fld"><label class="lbl" for="titel">Titel</label><input type="text" id="titel" style="width:100%"></div>
+  </div>
+
+  <div class="sec">
+    <h2>Populatie (P)</h2>
+    <div class="fld"><label class="lbl" for="ds">Tumorsoort <span class="tok">topo</span></label>
+      <select id="ds"></select>
+      <p class="hint" id="ds-hint"></p></div>
+    <div class="row">
+      <div class="fld"><span class="lbl">Diagnoseperiode <span class="tok">incjr</span></span>
+        <div class="seg" style="align-items:center"><input type="number" id="jrvan" aria-label="Diagnosejaar vanaf" style="width:96px" min="1989" max="2026"><span class="hint">t/m</span><input type="number" id="jrtot" aria-label="Diagnosejaar tot en met" style="width:96px" min="1989" max="2026"></div></div>
+      <div class="fld"><span class="lbl">Leeftijd <span class="tok">leeft</span></span>
+        <div class="seg" style="align-items:center"><input type="number" id="lmin" aria-label="Minimale leeftijd" style="width:80px" min="0" max="120"><span class="hint">tot</span><input type="number" id="lmax" aria-label="Maximale leeftijd (leeg = geen grens)" style="width:80px" min="0" max="120" placeholder="geen"></div></div>
+    </div>
+    <div class="row">
+      <div class="fld"><span class="lbl">Geslacht <span class="tok">gesl</span></span>
+        <div class="seg" data-key="gesl"><button type="button" data-v="beide">Beide</button><button type="button" data-v="man">Man</button><button type="button" data-v="vrouw">Vrouw</button></div></div>
+      <div class="fld"><span class="lbl">Gedrag <span class="tok">gedrag</span></span>
+        <div class="seg" data-key="gedrag"><button type="button" data-v="invasief">Invasief</button><button type="button" data-v="insitu">In situ</button><button type="button" data-v="beide">Beide</button></div></div>
+    </div>
+    <div class="fld"><span class="lbl">Morfologie <span class="tok">morf</span></span>
+      <div class="seg" id="morf-chips"></div>
+      <div class="seg" style="align-items:center"><input type="text" id="morf-extra" aria-label="Extra ICD-O-morfologiecodes, gescheiden door komma's" placeholder="Andere ICD-O-codes, bijv. 8520" style="width:260px"><span class="hint">Leeg = geen selectie op morfologie</span></div></div>
+    <div class="fld" id="fld-stad"><span class="lbl">Stadium</span>
+      <div class="seg" data-key="stadvar"><button type="button" data-v="stadium">Gecombineerd</button><button type="button" data-v="cstadium">Klinisch</button><button type="button" data-v="pstadium">Pathologisch</button></div>
+      <div class="seg" id="stad-chips"></div></div>
+    <div class="fld" id="fld-rec"><span class="lbl">Receptorstatus <span class="tok">er_stat</span><span class="tok">pr_stat</span><span class="tok">her2_stat</span></span>
+      <div class="seg" data-key="receptor"><button type="button" data-v="alle">Alle</button><button type="button" data-v="hrpos">HR+ / HER2−</button><button type="button" data-v="her2pos">HER2+</button><button type="button" data-v="tn">Triple-negatief</button></div></div>
+    <div class="fld"><span class="lbl">Eerdere maligniteit <span class="tok">mal</span></span>
+      <div class="seg" data-key="malexcl"><button type="button" data-v="geen">Niet uitsluiten</button><button type="button" data-v="5j">Uitsluiten &lt; 5 jaar voor diagnose</button><button type="button" data-v="ooit">Uitsluiten, ooit</button></div>
+      <p class="hint">In situ en basaalcelcarcinoom tellen niet mee.</p></div>
+  </div>
+
+  <div class="sec">
+    <h2>Interventie, vergelijking, uitkomst</h2>
+    <p class="hint">Eén regel per onderdeel. Laat I en C leeg bij een beschrijvende vraag.</p>
+    <div class="fld"><label class="lbl" for="pi">I · Interventie of determinant</label><input type="text" id="pi" maxlength="160" style="width:100%"></div>
+    <div class="fld"><label class="lbl" for="pc">C · Vergelijking</label><input type="text" id="pc" maxlength="160" style="width:100%"></div>
+    <div class="fld"><label class="lbl" for="po">O · Uitkomst</label><input type="text" id="po" maxlength="160" style="width:100%"></div>
+  </div>
+
+  <div class="sec">
+    <h2>Gegevenslevering</h2>
+    <div class="fld"><span class="lbl">Vorm</span>
+      <div class="seg" data-key="levering"><button type="button" data-v="record">Recordniveau</button><button type="button" data-v="aggr">Geaggregeerd</button></div></div>
+    <div class="fld"><span class="lbl">Data-items</span>
+      <div class="picker">
+        <div class="picker-head">
+          <input type="text" id="zoek" aria-label="Zoek variabele op naam of label" placeholder="Zoek op naam of label, bijv. her2 of reconstructie">
+          <select id="catf" aria-label="Filter op categorie"></select>
+          <button type="button" class="chip" id="alleen-gekozen" aria-pressed="false">Alleen gekozen</button>
+        </div>
+        <div class="vlist" id="vlist" role="list"></div>
+        <div class="picker-foot"><span id="vcount"></span><button type="button" class="chip" id="add-sel">Selectievariabelen toevoegen</button></div>
+      </div>
+      <p class="hint" id="itemset-hint" hidden></p>
+    </div>
+    <div class="fld"><label class="lbl" for="toel">Toelichting voor de analist <span class="hint" style="font-weight:400">(optioneel, max. 300 tekens)</span></label>
+      <textarea id="toel" maxlength="300"></textarea></div>
+  </div>
+</section>
+
+<section class="right" aria-label="Uitvoer">
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" id="t-sum" aria-selected="true" aria-controls="p-sum">Voor de analist</button>
+    <button type="button" role="tab" id="t-prompt" aria-selected="false" aria-controls="p-prompt">SAS-prompt</button>
+    <button type="button" role="tab" id="t-spec" aria-selected="false" aria-controls="p-spec">Specificatie</button>
+    <button type="button" role="tab" id="t-count" aria-selected="false" aria-controls="p-count">Indicatief aantal</button>
+  </div>
+  <div class="panel" id="p-sum" role="tabpanel" aria-labelledby="t-sum"></div>
+  <div class="panel" id="p-prompt" role="tabpanel" aria-labelledby="t-prompt" hidden>
+    <div class="panel-bar"><p>Plak in een taalmodel, eventueel met een goedgekeurd voorbeeldscript erbij.</p><button type="button" class="btn" data-copy="prompt">Kopieer prompt</button></div>
+    <pre class="out" id="out-prompt"></pre></div>
+  <div class="panel" id="p-spec" role="tabpanel" aria-labelledby="t-spec" hidden>
+    <div class="panel-bar"><p>Gestructureerde velden voor Dynamics en PowerBI.</p><button type="button" class="btn" data-copy="spec">Kopieer JSON</button></div>
+    <pre class="out" id="out-spec"></pre></div>
+  <div class="panel" id="p-count" role="tabpanel" aria-labelledby="t-count" hidden></div>
+</section>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+const CAT = /*__DATA__*/;
+const DS_INFO = /*__DATASETS__*/;
+const ITEMSETS = /*__ITEMSETS__*/;
+const CATS = ['Patiëntgegevens','Tumorgegevens','Procesgegevens','Risicofactoren','Behandelgegevens'];
+const SEL_VARS = {receptor:['er_stat','pr_stat','her2_stat'], stad:['stadium']};
+
+const EXAMPLE_VARS = 'gesl incjr leeft mal mal_int mal_tumsoort meno_stat vit_stat_int vit_stat topo_sublok later morf diffgrad diag_basis ct cn cm pt pn pm cstadium pstadium stadium ond_lymf pos_lymf tum_afm multifoc er_stat er_waarde pr_stat pr_waarde her2_stat her2_tech mammaprint_uitslag oncotype_uitslag chir chir_type chir_int uitgebr_chir_type uitgebr_chir_int inv_rad_laatste dcis_rad_laatste residu okd rt chemo chemo_code chemo_start_int chemo_stop_int horm horm_code horm_start_int target target_code target_start_int target_stop_int mri mri_int mari mari_int mari_uitslag swk swk_int swk_uitslag oksel_echo oksel_echo_uitslag oksel_echo_int'.split(' ');
+
+const base = n => n.replace(/\s*\[.*?\]\s*/g,'').trim();
+const multi = n => /\[/.test(n);
+
+function example(){
+  return {type:'update', vorige:'25-01377', nr:'26-01697', doel:'onderzoek',
+    titel:'Update ILC-studie: NST (8500) als controlegroep',
+    ds:'Borst', jrvan:2005, jrtot:2019, lmin:18, lmax:'', gesl:'beide', gedrag:'invasief',
+    morf:['8500'], morfExtra:'8520', stadvar:'stadium', stad:['1','2','3'], receptor:'hrpos', malexcl:'5j',
+    pi:'Invasief lobulair carcinoom (8520)', pc:'Ductaal carcinoom NNO / NST (8500)', po:'Behandeling en overleving',
+    levering:'record', vars:new Set(EXAMPLE_VARS), toel:'Ook eerdere maligniteiten > 5 jaar voor diagnose leveren, met systemische therapiecodes bij eerdere borstkanker. Oksel-echo uitsplitsen naar max. 3 puncties.'};
+}
+function empty(){
+  return {type:'nieuw', vorige:'', nr:'', doel:'onderzoek', titel:'', ds:'Borst', jrvan:2015, jrtot:2023, lmin:18, lmax:'', gesl:'beide', gedrag:'invasief',
+    morf:[], morfExtra:'', stadvar:'stadium', stad:[], receptor:'alle', malexcl:'geen', pi:'', pc:'', po:'', levering:'record', vars:new Set(), toel:''};
+}
+const KEY='nkr-aanvraag-concept';
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify({...S, vars:[...S.vars]})); }catch(e){} }
+function load(){ try{ const r=JSON.parse(localStorage.getItem(KEY)||'null'); if(!r) return null; const s={...empty(),...r,vars:new Set(r.vars||[])}; if(!CAT[s.ds] && s.ds!=='__itemset') s.ds='Borst'; return s; }catch(e){ return null; } }
+let S = load() || empty();
+let filt = {q:'', cat:'', only:false};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function vars(){ return (CAT[S.ds]||[]).map(a => ({c:a[0], n:a[1], b:base(a[1]), l:a[2], x:a[3], w:a[4], v:a[5], av:a[6], at:a[7]})); }
+function vmap(){ const m={}; vars().forEach(v=>m[v.b]=v); return m; }
+
+/* ---------- formulier vullen ---------- */
+function fillForm(){
+  const ds=$('ds'); ds.innerHTML = Object.keys(DS_INFO).map(k=>`<option value="${k}">${esc(DS_INFO[k].naam)} (${DS_INFO[k].icd}) · ${CAT[k].length} items</option>`).join('') + `<option value="__itemset">Andere tumorsoort · via itemset</option>`;
+  ds.value=S.ds;
+  ['vorige','titel','pi','pc','po','toel'].forEach(k=>$(k).value=S[k]);
+  $('aanvraagnr').value=S.nr; $('jrvan').value=S.jrvan; $('jrtot').value=S.jrtot; $('lmin').value=S.lmin; $('lmax').value=S.lmax; $('morf-extra').value=S.morfExtra;
+  $('catf').innerHTML = `<option value="">Alle categorieën</option>` + CATS.map(c=>`<option>${c}</option>`).join('');
+  syncSeg(); renderDsParts(); renderList(); update();
+}
+function syncSeg(){
+  document.querySelectorAll('.seg[data-key]').forEach(g=>{ const k=g.dataset.key; g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(S[k]===b.dataset.v))); });
+  $('fld-vorige').hidden = S.type!=='update';
+}
+function renderDsParts(){
+  const isItem = S.ds==='__itemset';
+  const m = vmap();
+  $('fld-rec').hidden = S.ds!=='Borst';
+  $('fld-stad').hidden = isItem || !m.stadium;
+  $('itemset-hint').hidden = !isItem;
+  if(isItem){
+    $('ds-hint').textContent='Voor deze tumorsoort is nog geen catalogus-dataset. Kies items uit de itemset en noem ze in de toelichting.';
+    $('itemset-hint').innerHTML = 'Itemsets: ' + ITEMSETS.map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(n)}</a>`).join(' · ') + ' · <a href="https://iknl.nl/nkr/registratie/itemsets" target="_blank" rel="noopener">alle itemsets</a>';
+  } else {
+    $('ds-hint').textContent = `Dataset ${S.ds}: ${CAT[S.ds].length} data-items in de catalogus.`;
+  }
+  const mv = (m.morf && m.morf.v) || [];
+  $('morf-chips').innerHTML = mv.filter(([c])=>c!=='8000').map(([c,l])=>`<button type="button" class="chip" data-morf="${c}" aria-pressed="${S.morf.includes(c)}">${c} ${esc(l)}</button>`).join('');
+  const groups = stageGroups();
+  $('stad-chips').innerHTML = groups.map(g=>`<button type="button" class="chip" data-stad="${g}" aria-pressed="${S.stad.includes(g)}">${g==='0'?'0':'Stadium '+['','I','II','III','IV'][+g]}</button>`).join('');
+}
+function stageGroups(){ const m=vmap(); const v=(m[S.stadvar]||m.stadium||{v:[]}).v.map(x=>x[0]); const g=new Set(); v.forEach(c=>{ const f=c[0]; if('01234'.includes(f)) g.add(f); }); return [...g].sort(); }
+
+function renderList(){
+  const L=$('vlist'); const q=filt.q.toLowerCase();
+  if(S.ds==='__itemset'){ L.innerHTML=`<p class="hint" style="padding:14px">Geen catalogus-dataset. Gebruik de itemset hieronder en beschrijf de items in de toelichting.</p>`; $('vcount').textContent=''; return; }
+  const rows = vars().filter(v => (!filt.cat || v.c===filt.cat) && (!filt.only || S.vars.has(v.b)) && (!q || v.n.toLowerCase().includes(q) || v.l.toLowerCase().includes(q)));
+  L.innerHTML = rows.map(v=>{
+    const id='v-'+v.b.replace(/[^a-z0-9_]/gi,'');
+    const flag = v.w ? `<span class="pill wn" title="${esc(v.w)}">${/niet uitgeleverd/i.test(v.w)?'niet leverbaar':/overleg/i.test(v.w)?'in overleg':'gegroepeerd'}</span>` : (v.av||v.at) ? `<span class="pill ok">${v.av||'…'}–${v.at||''}</span>` : '';
+    return `<label class="v" role="listitem" for="${id}"><input type="checkbox" id="${id}" data-var="${esc(v.b)}" ${S.vars.has(v.b)?'checked':''}><span style="min-width:0"><span class="nm">${esc(v.n)}</span> <span class="lb">${esc(v.l)}</span><br><span class="cat">${esc(v.c)}</span></span>${flag}</label>`;
+  }).join('') || `<p class="hint" style="padding:14px">Geen items gevonden.</p>`;
+  const tot = vars().filter(v=>S.vars.has(v.b)).length;
+  $('vcount').textContent = `${tot} van ${CAT[S.ds].length} gekozen`;
+}
+
+/* ---------- afleiden ---------- */
+function morfCodes(){ const extra=(S.morfExtra||'').split(/[\s,;]+/).map(s=>s.replace(/^M/i,'').slice(0,4)).filter(s=>/^\d{4}$/.test(s)); return [...new Set([...S.morf,...extra])].sort(); }
+function morfLabel(c){ const m=vmap().morf; const f=m && m.v.find(x=>x[0]===c); return f?f[1]:null; }
+const ROMAN=['0','I','II','III','IV'];
+function stadText(){ return S.stad.length ? `${{stadium:'gecombineerd',cstadium:'klinisch',pstadium:'pathologisch'}[S.stadvar]} stadium ${S.stad.map(g=>ROMAN[+g]).join(', ')}` : null; }
+function recText(){ return {alle:null,hrpos:'hormoonreceptor-positief (ER+ of PR+) en HER2-negatief',her2pos:'HER2-positief',tn:'triple-negatief'}[S.receptor]; }
+function malText(){ return {geen:null,'5j':'geen eerdere maligniteit < 5 jaar voor diagnose (in situ en BCC uitgezonderd)',ooit:'geen eerdere maligniteit (in situ en BCC uitgezonderd)'}[S.malexcl]; }
+function leeftText(){ return S.lmax!==''&&S.lmax!=null ? `${S.lmin}–${S.lmax} jaar` : `${S.lmin}+`; }
+function geslText(){ return {beide:'Beide',man:'Man',vrouw:'Vrouw'}[S.gesl]; }
+function gedragText(){ return {invasief:'Invasief',insitu:'In situ',beide:'Invasief en in situ'}[S.gedrag]; }
+function dsNaam(){ return S.ds==='__itemset' ? 'kanker (andere tumorsoort, via itemset)' : `${DS_INFO[S.ds].kanker} (${DS_INFO[S.ds].icd})`; }
+
+function pSentence(){
+  const parts=[];
+  parts.push(S.gesl==='beide'?'Patiënten':S.gesl==='man'?'Mannen':'Vrouwen');
+  parts.push(S.lmax!==''&&S.lmax!=null?`van ${S.lmin}–${S.lmax} jaar`:`van ${S.lmin} jaar en ouder`);
+  let t=`met ${S.gedrag==='insitu'?'in-situ':S.gedrag==='invasief'?'invasieve':''} ${dsNaam()}`.replace('  ',' ');
+  const mc=morfCodes(); if(mc.length) t+=`, morfologie ${mc.join('/')}`;
+  if(stadText()) t+=`, ${stadText()}`;
+  if(recText()) t+=`, ${recText()}`;
+  parts.push(t);
+  parts.push(`gediagnosticeerd ${S.jrvan}–${S.jrtot}`);
+  if(malText()) parts.push(malText());
+  return parts.join(' ').replace(' gediagnosticeerd',', gediagnosticeerd').replace(/ geen eerdere/,', geen eerdere');
+}
+
+function deliveryVars(){
+  // geeft [{sas, item, note}] terug, plus overgeslagen items
+  const m=vmap(); const out=[]; const skip=[]; const seen=new Set();
+  vars().filter(v=>S.vars.has(v.b)).forEach(v=>{
+    let sas = multi(v.n) ? v.b+':' : v.b; let note='';
+    if(v.b==='leeft'){ sas='leeft_cat'; note='5-jaarscategorieën via %leeft_cat'; }
+    else if(v.w && /niet uitgeleverd/i.test(v.w)){ skip.push({item:v,reden:'wordt in principe niet uitgeleverd (herleidbaar)'}); return; }
+    else if(v.w && /categorie|interval/i.test(v.w) && /dat$|dat\b/.test(v.b)){
+      const alt=v.b.replace(/_?dat$/,'_int').replace(/dat(\d?)$/,'int$1');
+      if(m[alt]){ skip.push({item:v,reden:`datum niet 1:1; lever ${alt} (interval in dagen)`}); if(!seen.has(alt)){ out.push({sas:multi(m[alt].n)?alt+':':alt,item:m[alt],note:'i.p.v. '+v.b}); seen.add(alt);} return; }
+      skip.push({item:v,reden:'datum niet 1:1; leveren in categorieën of intervallen'}); return;
+    }
+    else if(v.w && /overleg/i.test(v.w)) note='levering in overleg';
+    else if(v.w) note=v.w;
+    if(!seen.has(v.b)){ out.push({sas,item:v,note}); seen.add(v.b); }
+  });
+  return {out,skip};
+}
+
+function checks(){
+  const C=[]; const m=vmap();
+  if(S.ds==='__itemset'){ C.push(['wn','Geen catalogus-dataset: items handmatig controleren tegen de itemset.']); return C; }
+  vars().filter(v=>S.vars.has(v.b)).forEach(v=>{
+    if(v.av && S.jrvan < v.av) C.push(['wn',`${v.b}: pas beschikbaar vanaf ${v.av}; voor ${S.jrvan}–${v.av-1} ontbreekt dit.`]);
+    if(v.at && S.jrtot > v.at) C.push(['wn',`${v.b}: alleen beschikbaar t/m ${v.at}; voor ${v.at+1}–${S.jrtot} ontbreekt dit.`]);
+  });
+  if(S.receptor!=='alle' && S.jrvan<2005) C.push(['wn','Receptorstatus is beschikbaar vanaf 2005.']);
+  if(S.stad.length || S.vars.has('stadium')){
+    const ed=[[1989,1992,'TNM 4'],[1993,1998,'TNM 4'],[1999,2002,'TNM 5'],[2003,2009,'TNM 6'],[2010,2016,'TNM 7'],[2017,2025,'TNM 8']];
+    const hit=[...new Set(ed.filter(([a,b])=>!(S.jrtot<a||S.jrvan>b)).map(e=>e[2]))];
+    if(hit.length>1) C.push(['wn',`Periode beslaat meerdere TNM-edities: ${hit.join(', ')}.`]);
+  }
+  const mc=morfCodes(); const unk=mc.filter(c=>!morfLabel(c));
+  if(unk.length) C.push(['wn',`Morfologie ${unk.join(', ')} staat niet in de waardelijst van de catalogus; analist controleert de code.`]);
+  const {skip}=deliveryVars();
+  skip.forEach(s=>C.push(['bad',`${s.item.b}: ${s.reden}.`]));
+  if(S.levering==='record' && S.doel==='statistiek') C.push(['wn','Recordniveau voor statistiek: beperkingen op uitlevering, IKNL overlegt.']);
+  if(S.levering==='record' && S.gesl==='beide') C.push(['ok','Geslacht 3 (intersekse) wordt op recordniveau niet geleverd.']);
+  if([...S.vars].some(b=>/_zkh$/.test(b)||b==='contact_zkh1'||b==='zkh_patnum')) C.push(['wn','Ziekenhuisvariabelen: herleidbaar naar zorgaanbieders, aanvullende voorwaarden.']);
+  if(!S.vars.size) C.push(['bad','Nog geen data-items gekozen.']);
+  if(!C.some(c=>c[0]!=='ok')) C.unshift(['ok','Geen beschikbaarheids- of herleidbaarheidsproblemen gevonden.']);
+  return C;
+}
+
+function selectiecriteria(){
+  return [
+    ['Tumor: lokalisatie(s)', S.ds==='__itemset'?'xxx':DS_INFO[S.ds].naam],
+    ['Tumor: morfologie(en)', morfCodes().length? morfCodes().map(c=>`${c}${morfLabel(c)?' '+morfLabel(c):''}`).join(' + ') : 'Geen selectie'],
+    ['Tumor: stadium/stadia', stadText()||'Geen selectie'],
+    ['Tumor: gedrag', gedragText()],
+    ['Patiënt: geslacht', geslText()],
+    ['Patiënt: leeftijd (indeling)', leeftText()],
+    ['Diagnosejaren/-periode', `${S.jrvan}-${S.jrtot}`],
+    ['Niveau van de selectie', 'Landelijk'],
+    ['Behandeling(en)', S.pi && /chir|therap|behandel|radio|chemo|horm/i.test(S.pi) ? S.pi : 'xxx'],
+    ['Overige criteria', [recText(),malText()].filter(Boolean).join('; ')||'xxx']
+  ];
+}
+
+/* ---------- uitvoer ---------- */
+function buildSpec(){
+  const {out,skip}=deliveryVars();
+  return {
+    aanvraag:{nummer:S.nr||null,type:S.type,vorige_aanvraag:S.type==='update'?(S.vorige||null):null,titel:S.titel||null,gebruik:S.doel},
+    vraagtype: (S.pi||S.pc) ? (S.pc?'vergelijkend':'associatie') : 'beschrijvend',
+    dataset:S.ds==='__itemset'?null:S.ds,
+    tumsoort:S.ds==='__itemset'?null:(DS_INFO[S.ds].tumsoort||null),
+    populatie:{tekst:pSentence(),periode:{van:S.jrvan,tm:S.jrtot},geslacht:S.gesl,leeftijd:{min:+S.lmin,max:S.lmax===''?null:+S.lmax},gedrag:S.gedrag,morfologie:morfCodes(),
+      stadium:S.stad.length?{variabele:S.stadvar,groepen:S.stad.map(g=>ROMAN[+g])}:null,receptor:S.ds==='Borst'?S.receptor:null,eerdere_maligniteit_uitsluiten:S.malexcl},
+    pico:{P:pSentence(),I:S.pi||null,C:S.pc||null,O:S.po||null},
+    levering:S.levering,
+    variabelen:out.map(o=>({sas:o.sas,item:o.item.n,label:o.item.l,categorie:o.item.c,opmerking:o.note||null})),
+    niet_geleverd:skip.map(s=>({item:s.item.n,reden:s.reden})),
+    aandachtspunten:checks().filter(c=>c[0]!=='ok').map(c=>c[1]),
+    toelichting:S.toel||null
+  };
+}
+
+function buildPrompt(){
+  const info = S.ds==='__itemset'?{tumsoort:null,kern:null,kernbestand:null,naam:'Andere tumorsoort'}:DS_INFO[S.ds];
+  const nr = S.nr || '[jj-nnnnn]'; const [jj,nnnnn] = nr.includes('-')?nr.split('-'):['[jj]','[nnnnn]'];
+  const {out,skip}=deliveryVars();
+  const ts = info.tumsoort || '[tumsoort-code, TODO analist]';
+  const kern = info.kern || `[%kern-macro voor ${S.ds}, TODO analist]`;
+  const gesl = S.levering==='record' ? ({beide:'gesl in (1,2)',man:'gesl = 1',vrouw:'gesl = 2'}[S.gesl]) : ({beide:'(geen selectie op geslacht)',man:'gesl = 1',vrouw:'gesl = 2'}[S.gesl]);
+  const std = [
+    `tumsoort in (${ts})`,'tum_incl in (1)  * tumor binnen inclusiecriteria NKR','nl_incl in (1)  * woonachtig in NL bij diagnose',
+    S.doel==='onderzoek'?'ond_gebruik = 1  * gebruik voor wetenschappelijk onderzoek':null,
+    `${S.jrvan} <= incjr <= ${S.jrtot}`,"epis in ('DIA')",gesl,`leeft >= ${S.lmin}`,S.lmax!==''?`leeft <= ${S.lmax}`:null,'regstat = 0',
+    S.gedrag==='invasief'?'gedrag = 3  * TODO analist: controleer of tum_incl dit al afdekt':S.gedrag==='insitu'?'gedrag = 2':null
+  ].filter(Boolean);
+  const verder=[];
+  const mc=morfCodes(); if(mc.length) verder.push(`Morfologie: if morf in (${mc.join(',')});`);
+  if(S.receptor==='hrpos') verder.push('Receptorstatus HR+/HER2−: if er_stat=1 or pr_stat=1; if her2_stat in (0,1);');
+  if(S.receptor==='her2pos') verder.push('Receptorstatus HER2+: if her2_stat = 3;');
+  if(S.receptor==='tn') verder.push('Triple-negatief: if er_stat=0 and pr_stat=0 and her2_stat in (0,1);');
+  if(S.stad.length) verder.push(`Stadium: if substr(${S.stadvar},1,1) in (${S.stad.map(g=>`"${g}"`).join(', ')});`);
+  if(S.malexcl!=='geen') verder.push(`Eerdere maligniteit: %anderemaligniteit(<dataset>, format=W, periode=E, maanden=${S.malexcl==='5j'?'0-60':'0-9999'}, gedrag=3-9, tum_incl=1, regstat=0 1 5); daarna if mal = 0;`);
+  const hasSyst = out.some(o=>/^(chemo|horm|target|immuno|syst)_code/.test(o.sas));
+  const lmin5 = Math.ceil(((+S.lmin)+1)/5)*5-1;
+  const varlist = ['key_nkr key_eid', ...chunk(out.map(o=>o.sas), 10).map(a=>a.join(' '))].join('\n  ');
+  const sc = selectiecriteria();
+  const L = [];
+  L.push(`Je bent SAS-programmeur bij IKNL. Schrijf een basis-SAS-script voor NKR-gegevensaanvraag ${nr}, volgens de vaste IKNL-structuur hieronder.`);
+  L.push('');
+  L.push('Regels');
+  L.push('- Gebruik alleen de huismacro\'s die hieronder genoemd worden. Verzin geen macro\'s, variabelen of codes.');
+  L.push('- Gebruik variabelenamen exact zoals in de specificatie; een naam met : is een prefix-wildcard.');
+  L.push('- Zet na iedere selectiestap een proc freq als controle, vóór de data step die selecteert.');
+  L.push('- Markeer alles wat je niet zeker weet met /* TODO analist: ... */.');
+  L.push('- Neem geen persoonsgegevens van de aanvrager op; gebruik [aanvrager] als placeholder.');
+  if(S.type==='update') L.push(`- Dit is een update van aanvraag ${S.vorige||'[eerder nummer]'}. Begin het script met een kort commentaarblok dat de wijzigingen ten opzichte van die aanvraag noemt, en gebruik jroud/nroud van de eerdere aanvraag voor de sleutel (key_seed), zodat sleutels gelijk blijven.`);
+  L.push('');
+  L.push('Structuur van het script');
+  L.push(`1. Header-commentaar: aanvraag ${nr}, schrijver [analist], aanvrager [aanvrager], titel "${S.titel||'[titel]'}", datum, en één regel "Selectie: ${S.jrvan}-${S.jrtot}, ${(info.naam||'').toLowerCase()}, ${gedragText().toLowerCase()}${mc.length?', morf '+mc.join('/'):''}${stadText()?', '+stadText():''}, ${leeftText()}".`);
+  L.push(`2. %let jr = ${jj}; %let nr = ${nnnnn}; %let dir = ...\\20&jr\\&jr.-&nr; libname dir en libname lever (zoals gebruikelijk).`);
+  L.push('3. STANDAARDSELECTIE: sasfile krn.kern load; data tum; set krn.kern; met deze voorwaarden:');
+  std.forEach(s=>L.push(`   - ${s}`));
+  L.push(`   en daarna %kerntherapie; en ${kern};  sasfile krn.kern close;`);
+  L.push('   Gevolgd door een proc freq "eerste impressie" op de kernvariabelen.');
+  L.push('4. Verdere selectie, elke stap een eigen data step (tum1, tum2, ...):');
+  if(verder.length) verder.forEach(s=>L.push(`   - ${s}`)); else L.push('   - geen aanvullende selectie');
+  L.push('5. Variabelen:');
+  if(out.some(o=>o.sas==='leeft_cat')) L.push(`   - %leeft_cat(<dataset>, leeft_cat=5, leeft_min=${(+S.lmin)<=24?24:lmin5}, leeft_plus=85);  /* TODO analist: controleer ondergrens eerste categorie */ met proc freq leeft*leeft_cat ter controle.`);
+  if(hasSyst) L.push('   - %kernsystemisch(<dataset>, grp=1, extravars=1); voor de systemische therapiecodes.');
+  if(out.some(o=>/^mal/.test(o.sas)) && S.malexcl!=='geen') L.push('   - Informatie over overige maligniteiten buiten de exclusieperiode: opnieuw %anderemaligniteit met format=L en de complementaire periode, terugkoppelen aan de primaire tumor (TODO analist: controleer).');
+  if(S.toel) L.push(`   - Aanvullende wens van de aanvrager (beoordeel en werk uit, of zet als TODO): "${S.toel}"`);
+  L.push('6. LEVERINGSBESTAND' + (S.levering==='record'?' op recordniveau':' (geaggregeerd: maak in plaats van een recordbestand een proc tabulate/proc freq volgens de vraag; TODO analist voor de indeling)') + ':');
+  if(S.levering==='record'){
+    L.push('   - data key met key_nkr, key_zid, key_eid via key_seed (zoals gebruikelijk).');
+    if(hasSyst) L.push('   - %checkleeg(key, incllist=:syst_code:, drop=1, out=key);');
+    L.push('   - %let variabelen =');
+    L.push('  ' + varlist + '\n  ;');
+    L.push('   - %varvolgorde(key, &variabelen, out=levering, keep=1); proc export naar csv met delimiter \';\' (\'3b\'x).');
+    L.push('   - Ritssluiting bewaren: dir.key_&jr&nr met key_nkr key_zid key_eid rn zid eid epis dwh_release dwh_exportdat.');
+  }
+  L.push('7. DATA DICTIONARY:');
+  L.push(`   - %let kernbestand = ${info.kernbestand||'[kernbestand, TODO analist]'}; %formatdetail(&kernbestand, sort=D, multilabel=0);`);
+  L.push('   - %formatbestand(levering, out=datadict1, kernbest=&kernbestand, format=txt); data datadict2 met eventuele extra formats.');
+  L.push(`   - algemeen_vraagst = "${(S.type==='update'?`Update van dataset ${S.vorige||'[eerder nummer]'}. `:'') + pSentence()}${S.pi?` I: ${S.pi}.`:''}${S.pc?` C: ${S.pc}.`:''}${S.po?` O: ${S.po}.`:''}"`);
+  L.push('   - data selectiecriteria met precies deze 10 records, in deze volgorde:');
+  sc.forEach(([k,v],i)=>L.push(`     ${i+1}. ${k}: "${v}"`));
+  L.push('   - data toelichting_vars: alleen voor afgeleide variabelen (bijv. leeft_cat), anders xxx laten staan.');
+  L.push(`   - %datadictionary(datadict2, bestand=&jr.-&nr..csv, outdir=&dir, outfile=&jr.-&nr._Data_Dictionary, kernbest=&kernbestand, taal=1, filter=1, excllist=);`);
+  if(skip.length){ L.push(''); L.push('Niet opnemen in de levering (door de aanvrager gekozen, maar niet leverbaar zoals gevraagd):'); skip.forEach(s=>L.push(`- ${s.item.n}: ${s.reden}`)); }
+  const cw=checks().filter(c=>c[0]==='wn'); if(cw.length){ L.push(''); L.push('Aandachtspunten voor de analist (neem op als commentaar bovenin):'); cw.forEach(c=>L.push(`- ${c[1]}`)); }
+  L.push(''); L.push('Aanvraagspecificatie (bron van waarheid):'); L.push(JSON.stringify(buildSpec(),null,1));
+  return L.join('\n');
+}
+function chunk(a,n){ const r=[]; for(let i=0;i<a.length;i+=n) r.push(a.slice(i,i+n)); return r; }
+
+function renderSum(){
+  const {out,skip}=deliveryVars(); const C=checks();
+  const bycat={}; out.forEach(o=>bycat[o.item.c]=(bycat[o.item.c]||0)+1);
+  const pico=[['P',pSentence()],['I',S.pi],['C',S.pc],['O',S.po]].filter(x=>x[1]);
+  $('p-sum').innerHTML = `<div class="sum">
+    <div><p class="hint" style="font-weight:700;text-transform:uppercase;letter-spacing:.05em">${S.nr?esc(S.nr)+' · ':''}${S.type==='update'?'update van '+esc(S.vorige||'?'):'nieuwe aanvraag'} · ${S.doel==='onderzoek'?'wetenschappelijk onderzoek':'statistiek'}</p>
+      <h2 style="margin-top:4px">${esc(S.titel||'Zonder titel')}</h2></div>
+    <div class="pico">${pico.map(([k,v])=>`<span class="pl">${k}</span><p>${esc(v)}</p>`).join('')}</div>
+    <div class="stat"><span>Levering <b>${S.levering==='record'?'recordniveau':'geaggregeerd'}</b></span><span>Data-items <b>${out.length}</b></span>${CATS.filter(c=>bycat[c]).map(c=>`<span>${c.replace('gegevens','')} <b>${bycat[c]}</b></span>`).join('')}</div>
+    <div><p class="lbl" style="margin:0 0 8px">Controle tegen de catalogus</p><ul class="chk">${C.map(([t,m])=>`<li><span class="pill ${t}">${t==='ok'?'OK':t==='wn'?'Let op':'Actie'}</span><span>${esc(m)}</span></li>`).join('')}</ul></div>
+    ${S.toel?`<div><p class="lbl" style="margin:0 0 4px">Toelichting aanvrager</p><p style="margin:0">${esc(S.toel)}</p></div>`:''}
+    <div><p class="lbl" style="margin:0 0 8px">Selectiecriteria voor de data dictionary</p>
+      <div style="overflow-x:auto"><table class="dim"><tbody>${selectiecriteria().map(([k,v])=>`<tr><th scope="row" style="text-transform:none;letter-spacing:0;font-size:13px">${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</tbody></table></div></div>
+  </div>`;
+}
+function renderCount(){
+  const live=[['Tumorsoort',S.ds==='__itemset'?'—':DS_INFO[S.ds].naam,true],['Diagnoseperiode',`${S.jrvan}–${S.jrtot}`,true],['Geslacht',geslText(),true],['Leeftijd',leeftText(),true],['Gedrag',gedragText(),true],
+    ['Morfologie',morfCodes().join(', ')||'alle',true],['Stadium',stadText()||'alle',true],['Receptorstatus',recText()||'alle',S.receptor==='alle'],['Eerdere maligniteit',malText()||'niet uitgesloten',S.malexcl==='geen']];
+  const partial = live.some(r=>!r[2]);
+  $('p-count').innerHTML = `<div class="count">
+    <p class="hint">Grove telling uit een vooraf berekende tabel per DWH-release. Afgerond op 50; kleine aantallen worden getoond als &lt; 50.</p>
+    <div><span class="big">± [aantal]</span><p class="hint" style="margin-top:4px">Nog niet gekoppeld in dit prototype. ${partial?'Niet alle filters zitten in de snelle telling, dus het getal is een bovengrens.':''}</p></div>
+    <div style="overflow-x:auto"><table class="dim"><thead><tr><th>Filter</th><th>Waarde</th><th>In telling</th></tr></thead><tbody>
+    ${live.map(([k,v,ok])=>`<tr><td>${k}</td><td>${esc(v)}</td><td><span class="pill ${ok?'ok':'wn'}">${ok?'ja':'nee, bovengrens'}</span></td></tr>`).join('')}</tbody></table></div>
+  </div>`;
+}
+function update(){
+  save(); renderSum(); renderCount();
+  $('out-prompt').textContent = buildPrompt();
+  $('out-spec').textContent = JSON.stringify(buildSpec(), null, 2);
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  const g=b.closest('.seg[data-key]');
+  if(g){ S[g.dataset.key]=b.dataset.v; syncSeg(); if(g.dataset.key==='stadvar') renderDsParts(); update(); return; }
+  if(b.dataset.morf){ const c=b.dataset.morf; S.morf=S.morf.includes(c)?S.morf.filter(x=>x!==c):[...S.morf,c]; b.setAttribute('aria-pressed',String(S.morf.includes(c))); update(); return; }
+  if(b.dataset.stad){ const c=b.dataset.stad; S.stad=S.stad.includes(c)?S.stad.filter(x=>x!==c):[...S.stad,c].sort(); b.setAttribute('aria-pressed',String(S.stad.includes(c))); update(); return; }
+  if(b.getAttribute('role')==='tab'){ document.querySelectorAll('[role=tab]').forEach(t=>{ const on=t===b; t.setAttribute('aria-selected',String(on)); $(t.getAttribute('aria-controls')).hidden=!on; }); return; }
+  if(b.id==='alleen-gekozen'){ filt.only=!filt.only; b.setAttribute('aria-pressed',String(filt.only)); renderList(); return; }
+  if(b.id==='add-sel'){ const m=vmap(); ['gesl','incjr','leeft','morf','gedrag'].concat(S.stad.length?[S.stadvar]:[]).concat(S.receptor!=='alle'?SEL_VARS.receptor:[]).concat(S.malexcl!=='geen'?['mal']:[]).forEach(n=>{ if(m[n]) S.vars.add(n); }); renderList(); update(); toast('Selectievariabelen toegevoegd'); return; }
+  if(b.id==='btn-voorbeeld'){ S=example(); $('banner').hidden=false; fillForm(); toast('Voorbeeld geladen'); return; }
+  if(b.id==='btn-leeg'){ S=empty(); $('banner').hidden=true; fillForm(); toast('Formulier gewist'); return; }
+  if(b.dataset.copy){ const txt=b.dataset.copy==='prompt'?buildPrompt():JSON.stringify(buildSpec(),null,2); const pre=$(b.dataset.copy==='prompt'?'out-prompt':'out-spec');
+    try{ navigator.clipboard.writeText(txt).then(()=>toast('Gekopieerd'),()=>selectPre(pre)); }catch(err){ selectPre(pre); } }
+});
+document.addEventListener('change', e=>{
+  const t=e.target;
+  if(t.dataset && t.dataset.var){ t.checked?S.vars.add(t.dataset.var):S.vars.delete(t.dataset.var); const tot=vars().filter(v=>S.vars.has(v.b)).length; $('vcount').textContent=`${tot} van ${CAT[S.ds].length} gekozen`; update(); return; }
+  if(t.id==='ds'){ S.ds=t.value; S.morf=[]; S.stad=[]; if(S.ds!=='Borst') S.receptor='alle'; const m=vmap(); S.vars=new Set([...S.vars].filter(n=>m[n])); renderDsParts(); syncSeg(); renderList(); update(); }
+  if(t.id==='catf'){ filt.cat=t.value; renderList(); }
+});
+document.addEventListener('input', e=>{
+  const t=e.target; const map={vorige:'vorige',titel:'titel',pi:'pi',pc:'pc',po:'po',toel:'toel',aanvraagnr:'nr','morf-extra':'morfExtra'};
+  if(map[t.id]!==undefined){ S[map[t.id]]=t.value; update(); return; }
+  if(['jrvan','jrtot','lmin','lmax'].includes(t.id)){ S[t.id]= t.id==='lmax'&&t.value===''?'':(+t.value||0); update(); return; }
+  if(t.id==='zoek'){ filt.q=t.value; renderList(); }
+});
+function selectPre(pre){ const r=document.createRange(); r.selectNodeContents(pre); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast('Tekst geselecteerd: kopieer met Ctrl/Cmd+C'); }
+let tt; function toast(m){ const el=$('toast'); el.textContent=m; el.hidden=false; clearTimeout(tt); tt=setTimeout(()=>el.hidden=true,1800); }
+fillForm();
+</script>

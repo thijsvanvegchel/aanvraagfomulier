@@ -1,0 +1,82 @@
+{
+  "Borst": {
+    "kanker": "borstkanker",
+    "naam": "Borst",
+    "icd": "C50",
+    "tumsoort": "501300",
+    "kern": "%kernborst",
+    "kernbestand": "borst"
+  },
+  "CRC": {
+    "kanker": "darmkanker",
+    "naam": "Darm (CRC)",
+    "icd": "C18–C20",
+    "tumsoort": null,
+    "kern": null,
+    "kernbestand": null
+  },
+  "Cervix": {
+    "kanker": "baarmoederhalskanker",
+    "naam": "Cervix",
+    "icd": "C53",
+    "tumsoort": null,
+    "kern": null,
+    "kernbestand": null
+  },
+  "Endometrium": {
+    "kanker": "baarmoederkanker",
+    "naam": "Endometrium",
+    "icd": "C54/C55",
+    "tumsoort": null,
+    "kern": null,
+    "kernbestand": null
+  },
+  "HPB": {
+    "kanker": "HPB-tumoren",
+    "naam": "HPB",
+    "icd": "C17.0, C22–C26",
+    "tumsoort": null,
+    "kern": null,
+    "kernbestand": null
+  },
+  "Long": {
+    "kanker": "longkanker",
+    "naam": "Long",
+    "icd": "C34",
+    "tumsoort": null,
+    "kern": null,
+    "kernbestand": null
+  },
+  "MaagSlokdarm": {
+    "kanker": "maag- of slokdarmkanker",
+    "naam": "Maag en slokdarm",
+    "icd": "C15/C16",
+    "tumsoort": null,
+    "kern": null,
+    "kernbestand": null
+  },
+  "Ovarium": {
+    "kanker": "eierstok- of eileiderkanker",
+    "naam": "Ovarium",
+    "icd": "C56/C57, C48.1-2",
+    "tumsoort": null,
+    "kern": null,
+    "kernbestand": null
+  },
+  "Prostaat": {
+    "kanker": "prostaatkanker",
+    "naam": "Prostaat",
+    "icd": "C61",
+    "tumsoort": null,
+    "kern": null,
+    "kernbestand": null
+  },
+  "Vulva": {
+    "kanker": "vulvakanker",
+    "naam": "Vulva",
+    "icd": "C51",
+    "tumsoort": null,
+    "kern": null,
+    "kernbestand": null
+  }
+}
