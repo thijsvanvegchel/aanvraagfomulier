@@ -1,55 +1,39 @@
-# NKR Aanvraagbouwer
+# Roadmap en open punten
 
-Prototype voor een gestructureerde NKR-gegevensaanvraag. De aanvrager kiest PICO en data-items uit de
-[NKR-datacatalogus](https://iknl.nl/NKR-datacatalogus). De pagina maakt daar live van:
+## Bevindingen uit voorbeeld 26-01697
 
-- een **samenvatting voor de analist** (één scherm, met controles op beschikbaarheid en herleidbaarheid);
-- een **specificatie** in JSON, bedoeld voor Microsoft Dynamics en PowerBI;
-- een **prompt voor het SAS-basisscript**, volgens de vaste IKNL-structuur;
-- een opzet voor een **indicatief aantal patiënten** (nog niet gekoppeld).
+- 64 van de 66 geleverde variabelen hebben in de catalogus exact dezelfde naam als in het SAS-script.
+  De `%let variabelen`-lijst kan dus rechtstreeks uit de keuzes van de aanvrager komen.
+- `leeft_cat` is afgeleid van `leeft` (via `%leeft_cat`); dat regelt de generator.
+- `horm_stop_int` wordt wel geleverd, maar staat niet in de catalogus.
+- Morfologiecode 8520 (lobulair) ontbreekt in de waardelijst `morf` van dataset Borst.
+- Het script maakt oksel-echo leeg voor diagnoses vóór 2014; de catalogus noemt hetzelfde jaar.
+  Zulke beschikbaarheidsregels kunnen al in het formulier worden gemeld.
 
-## Snel starten
+## Kort
 
-```bash
-pip install -r requirements.txt
-python scripts/build.py          # bouwt dist/index.html
-node --test tests/*.test.js      # controleert de generator op voorbeeld 26-01697
-```
+- [x] Meerdere tumorsoorten in één aanvraag; per variabele zichtbaar in welke tumorsoorten hij bestaat.
+- [x] Koppeling met andere bronnen (o.a. PROFIEL voor vermoeidheid en kwaliteit van leven).
+- [ ] Per tumorsoort aparte selectie op morfologie en stadium (nu één selectie voor alle gekozen tumorsoorten).
 
-Open daarna `dist/index.html` in een browser. Er is geen server nodig.
+- [ ] `tumsoort`, `kern` en `kernbestand` invullen voor de 9 datasets naast Borst (`config/datasets.json`).
+- [ ] Catalogus aanvullen: `horm_stop_int`, volledige waardelijst `morf`.
+- [ ] Vaste delen van het SAS-script (header, libnames, standaardselectie, sleutels, export, data dictionary)
+      als sjabloon genereren, zonder taalmodel. De prompt alleen voor afgeleide variabelen en aanvullende wensen.
+- [ ] Twee of drie geanonimiseerde voorbeeldscripts toevoegen per tumorsoort.
+- [ ] Geaggregeerde levering uitwerken (nu alleen een TODO in de prompt).
 
-## Mappen
+## Middellang
 
-| Map | Inhoud |
-|---|---|
-| `src/template.html` | De pagina: opmaak, formulier en generator-logica. Hier werk je meestal in. |
-| `data/catalogus.json` | Alle variabelen uit de catalogus (10 datasets, 1684 items). |
-| `config/datasets.json` | Per dataset: naam, ICD-codes, `tumsoort`-code, kernmacro en kernbestand voor SAS. |
-| `config/itemsets.json` | Links naar itemsets voor tumorsoorten zonder catalogus-dataset. |
-| `scripts/scrape_catalogus.py` | Haalt de catalogus opnieuw op en schrijft `data/catalogus.json`. |
-| `scripts/build.py` | Voegt template, data en config samen tot `dist/index.html`. |
-| `sas/voorbeelden/` | Geanonimiseerde, goedgekeurde SAS-scripts als referentie voor de prompt. |
-| `tests/` | Tests van de generator, met een lokale kopie van de catalogus (Borst). |
-| `docs/` | Ontwerpkeuzes, bevindingen en open punten. |
+- [ ] Grove telling: vooraf berekende tabel per DWH-release (tumorsoort × incidentiejaar × geslacht ×
+      leeftijdscategorie × gedrag × stadiumgroep × morfologiegroep), afgerond op 50, kleine aantallen als "< 50".
+      Nagaan of NKR Cijfers deze telling al heeft.
+- [ ] Specificatie-JSON koppelen aan het bestaande formulier en Dynamics (velden vastleggen).
+- [ ] Itemsets als tabel beschikbaar maken, zodat ook tumorsoorten zonder catalogus-dataset gekozen kunnen worden.
 
-## Catalogus bijwerken
+## Klantportaal
 
-```bash
-python scripts/scrape_catalogus.py
-python scripts/build.py
-```
-
-Controleer de diff van `data/catalogus.json` in je pull request: zo zie je welke variabelen erbij of af zijn gegaan.
-
-## Samenwerken
-
-- Werk in een branch en open een pull request; de workflow bouwt de pagina en draait de tests.
-- Nieuwe tumorsoort: vul `tumsoort`, `kern` en `kernbestand` aan in `config/datasets.json`.
-  Zolang die leeg zijn, zet de prompt er `TODO analist` neer.
-- Nieuwe voorbeeldscripts: alleen geanonimiseerd (geen namen, geen netwerkpaden, geen aanvragersgegevens).
-- Open punten staan in [`docs/roadmap.md`](docs/roadmap.md).
-
-## Privacy
-
-De pagina bevat geen patiëntgegevens en stuurt niets naar een server. Concepten worden alleen in de
-browser van de gebruiker bewaard (`localStorage`).
+- [ ] Inloggen: stap 1 overslaan voor terugkerende aanvragers.
+- [ ] Update van een eerdere aanvraag: kies de aanvraag en toon alleen het verschil (bijv. "+ morf 8500").
+- [ ] Vragen en antwoorden met de analist in het portaal, met versies van de specificatie.
+- [ ] Status per fase met verwachte datum; data dictionary al vóór levering inzien.
