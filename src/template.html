@@ -19,14 +19,13 @@
   --tok-bg:#1B3540; --tok-fg:#A9DDEC; --code-bg:#08151A; --code-fg:#D8ECF2;
   --ok-bg:#16352A; --ok-fg:#A8DDBE; --wn-bg:#3A2D12; --wn-fg:#F3D59A; --bad-bg:#3D1C18; --bad-fg:#F4B4A9; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--f-body)}
 .wrap{max-width:1360px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header.top{border-bottom:1px solid var(--line-soft)}
 header.top .wrap{padding-block:18px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:baseline;justify-content:space-between}
 .brand{font-size:22px;font-weight:800;color:var(--brand);margin:0}
 .sub{color:var(--muted);margin:0;font-size:14px}
-.banner{background:var(--accent-soft);color:var(--accent-ink);border-bottom:1px solid var(--line-soft)}
-.banner .wrap{padding-block:10px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:14px}
 main.wrap{padding-block:24px 48px;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
 .left{flex:1 1 520px;min-width:0;display:flex;flex-direction:column;gap:22px}
 .right{flex:1 1 560px;min-width:0;position:sticky;top:env(safe-area-inset-top,0px);display:flex;flex-direction:column;gap:12px}
@@ -43,6 +42,7 @@ textarea{min-height:64px;resize:vertical;width:100%}
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
 .seg button,.chip{font:600 14px var(--f-body);min-height:40px;padding:0 13px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--brand);cursor:pointer}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
 .seg button[aria-pressed="true"],.chip[aria-pressed="true"]{background:var(--accent-soft);border:2px solid var(--accent);color:var(--accent-ink)}
 .tok{font:500 12px var(--f-mono);background:var(--tok-bg);color:var(--tok-fg);border-radius:3px;padding:2px 6px;white-space:nowrap}
 .pill{font:700 11px var(--f-body);letter-spacing:.04em;text-transform:uppercase;border-radius:3px;padding:2px 7px;white-space:nowrap}
@@ -83,6 +83,16 @@ pre.out{margin:0;padding:14px 16px;background:var(--code-bg);color:var(--code-fg
 table.dim{border-collapse:collapse;width:100%;font-size:14px}
 table.dim th,table.dim td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line-soft);vertical-align:top}
 table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.grp{border:2px solid var(--accent);border-radius:4px;padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.grp-c{border-color:var(--line)}
+.grp-h{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grp-h .lbl{flex:1 1 200px}
+.rule{border-top:1px solid var(--line-soft);padding-top:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.rule-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rule-h .lb{flex:1 1 auto;min-width:0}
+.x{font:700 16px var(--f-body);min-width:36px;min-height:36px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--muted);cursor:pointer}
+.gen{font-size:13px;color:var(--muted);margin:0;background:var(--surface);border-radius:4px;padding:8px 10px}
+.gen b{color:var(--ink);font-weight:600}
 .toast{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--brand);color:var(--brand-ink);padding:10px 16px;border-radius:4px;font-weight:700}
 .vis{position:absolute;left:-9999px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -90,9 +100,8 @@ table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-s
 
 <header class="top"><div class="wrap">
   <div><p class="brand">Nieuwe NKR-aanvraag</p><p class="sub">Prototype · van keuzes in de NKR-datacatalogus naar een aanvraagspecificatie en een prompt voor het SAS-basisscript</p></div>
-  <div class="seg"><button type="button" class="btn ghost" id="btn-voorbeeld">Voorbeeld 26-01697 laden</button><button type="button" class="btn ghost" id="btn-leeg">Alles wissen</button></div>
+  <div class="seg"><button type="button" class="btn ghost" id="btn-leeg">Alles wissen</button></div>
 </div></header>
-<div class="banner" id="banner" hidden><div class="wrap"><span class="pill ok">Voorbeeld</span><span id="banner-txt">Voorbeeld geladen: aanvraag 26-01697. Met ‘Alles wissen’ begint u weer leeg.</span></div></div>
 
 <main class="wrap">
 <section class="left" aria-label="Keuzes">
@@ -102,7 +111,7 @@ table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-s
     <div class="row">
       <div class="fld"><span class="lbl">Type aanvraag</span>
         <div class="seg" data-key="type"><button type="button" data-v="nieuw">Nieuw</button><button type="button" data-v="update">Update van eerdere aanvraag</button></div></div>
-      <div class="fld" id="fld-vorige"><label class="lbl" for="vorige">Eerder aanvraagnummer</label><input type="text" id="vorige" placeholder="bijv. 25-01377" style="width:160px"></div>
+      <div class="fld" id="fld-vorige"><label class="lbl" for="vorige">Eerder aanvraagnummer</label><input type="text" id="vorige" placeholder="jj-nnnnn" style="width:160px"></div>
     </div>
     <div class="row">
       <div class="fld"><label class="lbl" for="aanvraagnr">Aanvraagnummer</label><input type="text" id="aanvraagnr" placeholder="toegekend door IKNL" style="width:180px"></div>
@@ -114,8 +123,8 @@ table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-s
 
   <div class="sec">
     <h2>Populatie (P)</h2>
-    <div class="fld"><label class="lbl" for="ds">Tumorsoort <span class="tok">topo</span></label>
-      <select id="ds"></select>
+    <div class="fld"><span class="lbl">Tumorsoort(en) <span class="tok">topo</span></span>
+      <div class="seg" id="ds-chips" role="group" aria-label="Tumorsoorten, meerdere mogelijk"></div>
       <p class="hint" id="ds-hint"></p></div>
     <div class="row">
       <div class="fld"><span class="lbl">Diagnoseperiode <span class="tok">incjr</span></span>
@@ -125,7 +134,8 @@ table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-s
     </div>
     <div class="row">
       <div class="fld"><span class="lbl">Geslacht <span class="tok">gesl</span></span>
-        <div class="seg" data-key="gesl"><button type="button" data-v="beide">Beide</button><button type="button" data-v="man">Man</button><button type="button" data-v="vrouw">Vrouw</button></div></div>
+        <div class="seg" data-key="gesl"><button type="button" data-v="beide">Beide</button><button type="button" data-v="man">Man</button><button type="button" data-v="vrouw">Vrouw</button></div>
+        <p class="hint" id="gesl-hint" hidden></p></div>
       <div class="fld"><span class="lbl">Gedrag <span class="tok">gedrag</span></span>
         <div class="seg" data-key="gedrag"><button type="button" data-v="invasief">Invasief</button><button type="button" data-v="insitu">In situ</button><button type="button" data-v="beide">Beide</button></div></div>
     </div>
@@ -144,10 +154,12 @@ table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-s
 
   <div class="sec">
     <h2>Interventie, vergelijking, uitkomst</h2>
-    <p class="hint">Eén regel per onderdeel. Laat I en C leeg bij een beschrijvende vraag.</p>
-    <div class="fld"><label class="lbl" for="pi">I · Interventie of determinant</label><input type="text" id="pi" maxlength="160" style="width:100%"></div>
-    <div class="fld"><label class="lbl" for="pc">C · Vergelijking</label><input type="text" id="pc" maxlength="160" style="width:100%"></div>
-    <div class="fld"><label class="lbl" for="po">O · Uitkomst</label><input type="text" id="po" maxlength="160" style="width:100%"></div>
+    <p class="hint">Stel de groepen samen uit de catalogus: kies een variabele en daarna de waarden. Laat I en C leeg bij een beschrijvende vraag.</p>
+    <div class="grp" id="grp-I"></div>
+    <div class="grp grp-c" id="grp-C"></div>
+    <div class="fld"><span class="lbl">Groepsindeling in de levering</span>
+      <div class="seg" data-key="iconly"><button type="button" data-v="nee">Alle patiënten, met groepsvariabele</button><button type="button" data-v="ja">Alleen patiënten in I of C</button></div></div>
+    <div class="grp" id="grp-O"></div>
   </div>
 
   <div class="sec">
@@ -166,6 +178,10 @@ table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-s
       </div>
       <p class="hint" id="itemset-hint" hidden></p>
     </div>
+    <div class="fld"><span class="lbl">Koppeling met andere databronnen</span>
+      <div class="seg" data-key="koppel"><button type="button" data-v="nee">Nee</button><button type="button" data-v="ja">Ja</button><button type="button" data-v="weetniet">Weet ik (nog) niet</button></div>
+      <div class="seg" id="bron-chips"></div>
+      <p class="hint">Patiëntgerapporteerde uitkomsten zoals vermoeidheid en kwaliteit van leven staan niet in de NKR; die komen uit PROFIEL. Koppelingen hebben een doorlooptijd van 4 tot 6 maanden.</p></div>
     <div class="fld"><label class="lbl" for="toel">Toelichting voor de analist <span class="hint" style="font-weight:400">(optioneel, max. 300 tekens)</span></label>
       <textarea id="toel" maxlength="300"></textarea></div>
   </div>
@@ -197,58 +213,121 @@ const ITEMSETS = /*__ITEMSETS__*/;
 const CATS = ['Patiëntgegevens','Tumorgegevens','Procesgegevens','Risicofactoren','Behandelgegevens'];
 const SEL_VARS = {receptor:['er_stat','pr_stat','her2_stat'], stad:['stadium']};
 
-const EXAMPLE_VARS = 'gesl incjr leeft mal mal_int mal_tumsoort meno_stat vit_stat_int vit_stat topo_sublok later morf diffgrad diag_basis ct cn cm pt pn pm cstadium pstadium stadium ond_lymf pos_lymf tum_afm multifoc er_stat er_waarde pr_stat pr_waarde her2_stat her2_tech mammaprint_uitslag oncotype_uitslag chir chir_type chir_int uitgebr_chir_type uitgebr_chir_int inv_rad_laatste dcis_rad_laatste residu okd rt chemo chemo_code chemo_start_int chemo_stop_int horm horm_code horm_start_int target target_code target_start_int target_stop_int mri mri_int mari mari_int mari_uitslag swk swk_int swk_uitslag oksel_echo oksel_echo_uitslag oksel_echo_int'.split(' ');
 
 const base = n => n.replace(/\s*\[.*?\]\s*/g,'').trim();
 const multi = n => /\[/.test(n);
 
-function example(){
-  return {type:'update', vorige:'25-01377', nr:'26-01697', doel:'onderzoek',
-    titel:'Update ILC-studie: NST (8500) als controlegroep',
-    ds:'Borst', jrvan:2005, jrtot:2019, lmin:18, lmax:'', gesl:'beide', gedrag:'invasief',
-    morf:['8500'], morfExtra:'8520', stadvar:'stadium', stad:['1','2','3'], receptor:'hrpos', malexcl:'5j',
-    pi:'Invasief lobulair carcinoom (8520)', pc:'Ductaal carcinoom NNO / NST (8500)', po:'Behandeling en overleving',
-    levering:'record', vars:new Set(EXAMPLE_VARS), toel:'Ook eerdere maligniteiten > 5 jaar voor diagnose leveren, met systemische therapiecodes bij eerdere borstkanker. Oksel-echo uitsplitsen naar max. 3 puncties.'};
-}
 function empty(){
-  return {type:'nieuw', vorige:'', nr:'', doel:'onderzoek', titel:'', ds:'Borst', jrvan:2015, jrtot:2023, lmin:18, lmax:'', gesl:'beide', gedrag:'invasief',
-    morf:[], morfExtra:'', stadvar:'stadium', stad:[], receptor:'alle', malexcl:'geen', pi:'', pc:'', po:'', levering:'record', vars:new Set(), toel:''};
+  return {type:'nieuw', vorige:'', nr:'', doel:'onderzoek', titel:'', dss:['Borst'], jrvan:2015, jrtot:2023, lmin:18, lmax:'', gesl:'beide', gedrag:'invasief',
+    morf:[], morfExtra:'', stadvar:'stadium', stad:[], receptor:'alle', malexcl:'geen', pi:'', pc:'', po:'', ic:{I:[],C:[]}, iconly:'nee', out:[], levering:'record', koppel:'nee', bronnen:[], vars:new Set(), toel:''};
 }
-const KEY='nkr-aanvraag-concept';
+const KEY='nkr-aanvraag-concept-v2';
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify({...S, vars:[...S.vars]})); }catch(e){} }
-function load(){ try{ const r=JSON.parse(localStorage.getItem(KEY)||'null'); if(!r) return null; const s={...empty(),...r,vars:new Set(r.vars||[])}; if(!CAT[s.ds] && s.ds!=='__itemset') s.ds='Borst'; return s; }catch(e){ return null; } }
+function load(){ try{ const r=JSON.parse(localStorage.getItem(KEY)||'null'); if(!r) return null; const s={...empty(),...r,vars:new Set(r.vars||[])}; if(!Array.isArray(s.dss)) s.dss=r.ds?[r.ds]:['Borst']; delete s.ds; s.dss=s.dss.filter(d=>CAT[d]||d==='__itemset'); if(!s.dss.length) s.dss=['Borst']; return s; }catch(e){ return null; } }
 let S = load() || empty();
 let filt = {q:'', cat:'', only:false};
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function vars(){ return (CAT[S.ds]||[]).map(a => ({c:a[0], n:a[1], b:base(a[1]), l:a[2], x:a[3], w:a[4], v:a[5], av:a[6], at:a[7]})); }
-function vmap(){ const m={}; vars().forEach(v=>m[v.b]=v); return m; }
+function dsList(){ return (S.dss||[]).filter(d=>CAT[d]); }
+function isItem(){ return (S.dss||[]).includes('__itemset'); }
+function onlyItem(){ return !dsList().length; }
+let _vc={key:null,list:null,map:null};
+function vars(){
+  const key=dsList().join('|'); if(_vc.key===key) return _vc.list;
+  const m=new Map();
+  dsList().forEach(ds=>CAT[ds].forEach(a=>{ const b=base(a[1]); let v=m.get(b);
+    if(!v){ v={c:a[0],n:a[1],b,l:a[2],x:a[3],w:a[4],v:a[5].slice(),av:a[6],at:a[7],ds:[],per:{}}; m.set(b,v); }
+    else { a[5].forEach(p=>{ if(!v.v.some(q=>q[0]===p[0])) v.v.push(p); }); if(!v.w&&a[4]) v.w=a[4]; if(!multi(v.n)&&multi(a[1])) v.n=a[1]; }
+    v.ds.push(ds); v.per[ds]={av:a[6],at:a[7]}; }));
+  const list=[...m.values()]; const map={}; list.forEach(v=>map[v.b]=v);
+  _vc={key,list,map}; return list;
+}
+function vmap(){ vars(); return _vc.map; }
+function dsNamen(){ return dsList().map(d=>DS_INFO[d].naam); }
+
+/* ---------- I, C en O uit de catalogus ---------- */
+const GRP = {I:{naam:'Interventie of determinant',veld:'pi',ph:'Naam van de groep, bijv. Borstsparend'},
+             C:{naam:'Vergelijking',veld:'pc',ph:'Naam van de groep, bijv. Ablatio'}};
+const O_QUICK = [['Overleving',['vit_stat','vit_stat_int']],['Metastasen',['meta_topo','meta_int']],
+  ['Tweede maligniteit',['mal','mal_tumsoort','mal_int']],['Chirurgische uitkomst',['chir_compl','residu','inv_rad_laatste']]];
+function ruleCodes(r){ const ex=(r.extra||'').split(/[\s,;]+/).filter(Boolean); return [...new Set([...(r.vals||[]),...ex])]; }
+function valLabel(n,c){ const v=vmap()[n]; const f=v&&v.v.find(x=>x[0]===c); return f?f[1]:null; }
+function ruleText(r){ const v=vmap()[r.n]; const cs=ruleCodes(r); return `${v?v.l:r.n}: ${cs.length?cs.map(c=>valLabel(r.n,c)?`${c} ${valLabel(r.n,c)}`:c).join(' of '):'nog geen waarde gekozen'}`; }
+function groupText(g){ return (S.ic[g]||[]).map(ruleText).join(' en '); }
+function picoText(g){ const naam=S[GRP[g].veld]; const r=groupText(g); return naam&&r?`${naam} (${r})`:(naam||r||''); }
+function oText(){ const m=vmap(); const vs=(S.out||[]).map(n=>m[n]?m[n].l:n).join(', '); return S.po&&vs?`${S.po} (${vs})`:(S.po||vs||''); }
+function hasGroups(){ return (S.ic.I||[]).some(r=>ruleCodes(r).length) || (S.ic.C||[]).some(r=>ruleCodes(r).length); }
+function sasVal(c){ return /^-?\d+(\.\d+)?$/.test(c)?c:`"${c}"`; }
+function ruleSas(r){ const v=vmap()[r.n]; const rep=v&&multi(v.n); return `${rep?r.n+'1':r.n} in (${ruleCodes(r).map(sasVal).join(',')})${rep?' /* TODO analist: alleen eerste registratie of alle herhalingen? */':''}`; }
+function groupSas(g){ return (S.ic[g]||[]).filter(r=>ruleCodes(r).length).map(ruleSas).join(' and '); }
+function varOptions(onlyLists){
+  const vs=vars().filter(v=>!onlyLists||v.v.length);
+  return CATS.map(c=>{ const o=vs.filter(v=>v.c===c); return o.length?`<optgroup label="${c}">${o.map(v=>`<option value="${esc(v.b)}">${esc(v.n)} · ${esc(v.l)}</option>`).join('')}</optgroup>`:''; }).join('');
+}
+function renderICO(){
+  if(onlyItem()){ ['I','C','O'].forEach(g=>$('grp-'+g).innerHTML=`<p class="hint">Geen catalogus-dataset: beschrijf ${g==='O'?'de uitkomst':'deze groep'} in de toelichting.</p>`); return; }
+  ['I','C'].forEach(g=>{
+    const G=GRP[g];
+    const rules=(S.ic[g]||[]).map((r,i)=>{ const v=vmap()[r.n]; if(!v) return '';
+      return `<div class="rule">
+        <div class="rule-h"><span class="tok">${esc(v.n)}</span><span class="lb">${esc(v.l)}</span><button type="button" class="x" data-act="rm" data-g="${g}" data-i="${i}" aria-label="Voorwaarde ${esc(v.b)} verwijderen">×</button></div>
+        <div class="seg">${v.v.map(([c,l])=>`<button type="button" class="chip" data-act="val" data-g="${g}" data-i="${i}" data-c="${esc(c)}" aria-pressed="${(r.vals||[]).includes(c)}">${esc(c)} ${esc(l)}</button>`).join('')}</div>
+        <input type="text" id="extra-${g}-${i}" data-act="extra" data-g="${g}" data-i="${i}" value="${esc(r.extra||'')}" aria-label="Andere codes voor ${esc(v.b)}" placeholder="Andere codes, gescheiden door komma's" style="width:100%;max-width:340px">
+      </div>`; }).join('');
+    $('grp-'+g).innerHTML = `
+      <div class="grp-h"><span class="pl"${g==='C'?' style="background:var(--muted)"':''}>${g}</span><label class="lbl" for="${G.veld}">${G.naam}</label></div>
+      <input type="text" id="${G.veld}" maxlength="120" placeholder="${G.ph}" style="width:100%">
+      ${rules}
+      <select data-add="${g}" aria-label="Voorwaarde uit de catalogus toevoegen aan groep ${g}"><option value="">+ Voorwaarde uit de catalogus…</option>${varOptions(true)}</select>
+      ${groupText(g)?`<p class="gen"><b>${g}:</b> ${esc(groupText(g))}</p>`:''}`;
+    $(G.veld).value=S[G.veld]||'';
+  });
+  const m=vmap();
+  const outs=(S.out||[]).filter(n=>m[n]);
+  $('grp-O').innerHTML = `
+    <div class="grp-h"><span class="pl">O</span><label class="lbl" for="po">Uitkomst</label></div>
+    <input type="text" id="po" maxlength="120" placeholder="Naam van de uitkomst, bijv. 5-jaarsoverleving" style="width:100%">
+    <div class="seg">${O_QUICK.filter(([,ns])=>ns.some(n=>m[n])).map(([naam,ns])=>`<button type="button" class="chip" data-quick="${ns.filter(n=>m[n]).join(' ')}" aria-pressed="${ns.filter(n=>m[n]).every(n=>outs.includes(n))}">${naam}</button>`).join('')}</div>
+    ${outs.map(n=>`<div class="rule-h"><span class="tok">${esc(m[n].n)}</span><span class="lb">${esc(m[n].l)}</span><button type="button" class="x" data-act="orm" data-n="${esc(n)}" aria-label="Uitkomst ${esc(n)} verwijderen">×</button></div>`).join('')}
+    <select data-add="O" aria-label="Uitkomstvariabele uit de catalogus toevoegen"><option value="">+ Uitkomstvariabele uit de catalogus…</option>${varOptions(false)}</select>`;
+  $('po').value=S.po||'';
+}
 
 /* ---------- formulier vullen ---------- */
 function fillForm(){
-  const ds=$('ds'); ds.innerHTML = Object.keys(DS_INFO).map(k=>`<option value="${k}">${esc(DS_INFO[k].naam)} (${DS_INFO[k].icd}) · ${CAT[k].length} items</option>`).join('') + `<option value="__itemset">Andere tumorsoort · via itemset</option>`;
-  ds.value=S.ds;
-  ['vorige','titel','pi','pc','po','toel'].forEach(k=>$(k).value=S[k]);
+  renderDsChips();
+  ['vorige','titel','toel'].forEach(k=>$(k).value=S[k]);
+  renderICO();
   $('aanvraagnr').value=S.nr; $('jrvan').value=S.jrvan; $('jrtot').value=S.jrtot; $('lmin').value=S.lmin; $('lmax').value=S.lmax; $('morf-extra').value=S.morfExtra;
   $('catf').innerHTML = `<option value="">Alle categorieën</option>` + CATS.map(c=>`<option>${c}</option>`).join('');
-  syncSeg(); renderDsParts(); renderList(); update();
+  applySex(); syncSeg(); renderDsParts(); renderList(); update();
+}
+function renderDsChips(){
+  $('ds-chips').innerHTML = Object.keys(DS_INFO).map(k=>`<button type="button" class="chip" data-ds="${k}" aria-pressed="${S.dss.includes(k)}">${esc(DS_INFO[k].naam)} <span style="font-weight:400">${esc(DS_INFO[k].icd)}</span></button>`).join('')
+    + `<button type="button" class="chip" data-ds="__itemset" aria-pressed="${S.dss.includes('__itemset')}">Andere tumorsoort (itemset)</button>`;
+}
+const BRONNEN = ["PROFIEL", "CBS", "PALGA", "PLCRC", "POCOP", "PACAP", "DHD", "Lifelines", "Nivel", "Pharmo", "Biobanken", "Audits/kwaliteitsregistratie", "Bevolkingsonderzoek", "Studiecohort", "Cohorten eigen ziekenhuis", "Anders"];
+function renderBronnen(){
+  $('bron-chips').hidden = S.koppel==='nee';
+  $('bron-chips').innerHTML = BRONNEN.map(x=>`<button type="button" class="chip" data-bron="${esc(x)}" aria-pressed="${S.bronnen.includes(x)}">${esc(x)}</button>`).join('');
 }
 function syncSeg(){
   document.querySelectorAll('.seg[data-key]').forEach(g=>{ const k=g.dataset.key; g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(S[k]===b.dataset.v))); });
+  renderBronnen();
   $('fld-vorige').hidden = S.type!=='update';
 }
 function renderDsParts(){
-  const isItem = S.ds==='__itemset';
-  const m = vmap();
-  $('fld-rec').hidden = S.ds!=='Borst';
-  $('fld-stad').hidden = isItem || !m.stadium;
-  $('itemset-hint').hidden = !isItem;
-  if(isItem){
-    $('ds-hint').textContent='Voor deze tumorsoort is nog geen catalogus-dataset. Kies items uit de itemset en noem ze in de toelichting.';
+  const m = vmap(); const L=dsList();
+  $('fld-rec').hidden = !(L.length===1 && L[0]==='Borst');
+  $('fld-stad').hidden = !m.stadium;
+  $('itemset-hint').hidden = !isItem();
+  const n=vars().length, common=vars().filter(v=>v.ds.length===L.length).length;
+  $('ds-hint').textContent = !L.length ? 'Geen catalogus-dataset gekozen. Kies items uit de itemset en noem ze in de toelichting.'
+    : L.length===1 ? `Dataset ${L[0]}: ${n} data-items in de catalogus.${isItem()?' Plus een tumorsoort via itemset.':''}`
+    : `${L.length} tumorsoorten: ${n} data-items, waarvan ${common} in alle gekozen tumorsoorten.${isItem()?' Plus een tumorsoort via itemset.':''}`;
+  if(isItem()){
     $('itemset-hint').innerHTML = 'Itemsets: ' + ITEMSETS.map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(n)}</a>`).join(' · ') + ' · <a href="https://iknl.nl/nkr/registratie/itemsets" target="_blank" rel="noopener">alle itemsets</a>';
-  } else {
-    $('ds-hint').textContent = `Dataset ${S.ds}: ${CAT[S.ds].length} data-items in de catalogus.`;
   }
   const mv = (m.morf && m.morf.v) || [];
   $('morf-chips').innerHTML = mv.filter(([c])=>c!=='8000').map(([c,l])=>`<button type="button" class="chip" data-morf="${c}" aria-pressed="${S.morf.includes(c)}">${c} ${esc(l)}</button>`).join('');
@@ -259,15 +338,16 @@ function stageGroups(){ const m=vmap(); const v=(m[S.stadvar]||m.stadium||{v:[]}
 
 function renderList(){
   const L=$('vlist'); const q=filt.q.toLowerCase();
-  if(S.ds==='__itemset'){ L.innerHTML=`<p class="hint" style="padding:14px">Geen catalogus-dataset. Gebruik de itemset hieronder en beschrijf de items in de toelichting.</p>`; $('vcount').textContent=''; return; }
+  if(onlyItem()){ L.innerHTML=`<p class="hint" style="padding:14px">Geen catalogus-dataset. Gebruik de itemset hieronder en beschrijf de items in de toelichting.</p>`; $('vcount').textContent=''; return; }
   const rows = vars().filter(v => (!filt.cat || v.c===filt.cat) && (!filt.only || S.vars.has(v.b)) && (!q || v.n.toLowerCase().includes(q) || v.l.toLowerCase().includes(q)));
   L.innerHTML = rows.map(v=>{
     const id='v-'+v.b.replace(/[^a-z0-9_]/gi,'');
     const flag = v.w ? `<span class="pill wn" title="${esc(v.w)}">${/niet uitgeleverd/i.test(v.w)?'niet leverbaar':/overleg/i.test(v.w)?'in overleg':'gegroepeerd'}</span>` : (v.av||v.at) ? `<span class="pill ok">${v.av||'…'}–${v.at||''}</span>` : '';
-    return `<label class="v" role="listitem" for="${id}"><input type="checkbox" id="${id}" data-var="${esc(v.b)}" ${S.vars.has(v.b)?'checked':''}><span style="min-width:0"><span class="nm">${esc(v.n)}</span> <span class="lb">${esc(v.l)}</span><br><span class="cat">${esc(v.c)}</span></span>${flag}</label>`;
+    const part = dsList().length>1 && v.ds.length<dsList().length ? ` · alleen ${v.ds.map(d=>DS_INFO[d].naam).join(', ')}` : '';
+    return `<label class="v" role="listitem" for="${id}"><input type="checkbox" id="${id}" data-var="${esc(v.b)}" ${S.vars.has(v.b)?'checked':''}><span style="min-width:0"><span class="nm">${esc(v.n)}</span> <span class="lb">${esc(v.l)}</span><br><span class="cat">${esc(v.c)}${esc(part)}</span></span>${flag}</label>`;
   }).join('') || `<p class="hint" style="padding:14px">Geen items gevonden.</p>`;
   const tot = vars().filter(v=>S.vars.has(v.b)).length;
-  $('vcount').textContent = `${tot} van ${CAT[S.ds].length} gekozen`;
+  $('vcount').textContent = `${tot} van ${vars().length} gekozen`;
 }
 
 /* ---------- afleiden ---------- */
@@ -278,9 +358,18 @@ function stadText(){ return S.stad.length ? `${{stadium:'gecombineerd',cstadium:
 function recText(){ return {alle:null,hrpos:'hormoonreceptor-positief (ER+ of PR+) en HER2-negatief',her2pos:'HER2-positief',tn:'triple-negatief'}[S.receptor]; }
 function malText(){ return {geen:null,'5j':'geen eerdere maligniteit < 5 jaar voor diagnose (in situ en BCC uitgezonderd)',ooit:'geen eerdere maligniteit (in situ en BCC uitgezonderd)'}[S.malexcl]; }
 function leeftText(){ return S.lmax!==''&&S.lmax!=null ? `${S.lmin}–${S.lmax} jaar` : `${S.lmin}+`; }
-function geslText(){ return {beide:'Beide',man:'Man',vrouw:'Vrouw'}[S.gesl]; }
+function fixedSex(){ const L=dsList(); if(!L.length||isItem()) return null; const g=L.map(d=>DS_INFO[d].geslacht||null); return g.every(x=>x&&x===g[0])?g[0]:null; }
+function geslText(){ return {beide:'Beide',man:'Man',vrouw:'Vrouw'}[S.gesl] + (fixedSex()?' (volgt uit de tumorsoort)':''); }
+function applySex(prevFixed){
+  const fx=fixedSex();
+  if(fx) S.gesl=fx; else if(prevFixed) S.gesl='beide';
+  document.querySelectorAll('.seg[data-key="gesl"] button').forEach(b=>{ b.disabled=!!fx && b.dataset.v!==fx; });
+  const h=$('gesl-hint');
+  if(fx){ h.hidden=false; h.textContent=`${dsList().length>1?'Deze tumorsoorten komen':DS_INFO[dsList()[0]].kanker.replace(/^./,c=>c.toUpperCase())+' komt'} alleen voor bij ${fx==='man'?'mannen':'vrouwen'}. Er wordt niet extra geselecteerd op geregistreerd geslacht.`; }
+  else { h.hidden=true; h.textContent=''; }
+}
 function gedragText(){ return {invasief:'Invasief',insitu:'In situ',beide:'Invasief en in situ'}[S.gedrag]; }
-function dsNaam(){ return S.ds==='__itemset' ? 'kanker (andere tumorsoort, via itemset)' : `${DS_INFO[S.ds].kanker} (${DS_INFO[S.ds].icd})`; }
+function dsNaam(){ const p=dsList().map(d=>`${DS_INFO[d].kanker} (${DS_INFO[d].icd})`); if(isItem()) p.push('een andere tumorsoort (via itemset)'); return p.length>1 ? p.slice(0,-1).join(', ')+' of '+p[p.length-1] : (p[0]||'kanker'); }
 
 function pSentence(){
   const parts=[];
@@ -317,11 +406,18 @@ function deliveryVars(){
 
 function checks(){
   const C=[]; const m=vmap();
-  if(S.ds==='__itemset'){ C.push(['wn','Geen catalogus-dataset: items handmatig controleren tegen de itemset.']); return C; }
+  if(isItem()) C.push(['wn','Tumorsoort via itemset: items handmatig controleren tegen de itemset.']);
+  if(onlyItem()) return C;
+  const L=dsList(), meer=L.length>1;
   vars().filter(v=>S.vars.has(v.b)).forEach(v=>{
-    if(v.av && S.jrvan < v.av) C.push(['wn',`${v.b}: pas beschikbaar vanaf ${v.av}; voor ${S.jrvan}–${v.av-1} ontbreekt dit.`]);
-    if(v.at && S.jrtot > v.at) C.push(['wn',`${v.b}: alleen beschikbaar t/m ${v.at}; voor ${v.at+1}–${S.jrtot} ontbreekt dit.`]);
+    if(meer && v.ds.length<L.length) C.push(['wn',`${v.b}: alleen in ${v.ds.map(d=>DS_INFO[d].naam).join(', ')}; ontbreekt voor ${L.filter(d=>!v.ds.includes(d)).map(d=>DS_INFO[d].naam).join(', ')}.`]);
+    v.ds.forEach(d=>{ const {av,at}=v.per[d]; const w=meer?` (${DS_INFO[d].naam})`:'';
+      if(av && S.jrvan < av) C.push(['wn',`${v.b}${w}: pas beschikbaar vanaf ${av}; voor ${S.jrvan}–${av-1} ontbreekt dit.`]);
+      if(at && S.jrtot > at) C.push(['wn',`${v.b}${w}: alleen beschikbaar t/m ${at}; voor ${at+1}–${S.jrtot} ontbreekt dit.`]); });
   });
+  if(S.koppel!=='nee') C.push(['wn',`Koppeling${S.bronnen.length?' met '+S.bronnen.join(', '):''}: langere doorlooptijd (4–6 maanden), afhankelijk van de andere partij.`]);
+  if(/vermoeid|fatigue|kwaliteit van leven|klachten|prom/i.test([S.pi,S.pc,S.po,S.toel,S.titel].join(' ')) && !S.bronnen.includes('PROFIEL'))
+    C.push(['wn','Vermoeidheid en kwaliteit van leven staan niet in de NKR. Kies koppeling met PROFIEL.']);
   if(S.receptor!=='alle' && S.jrvan<2005) C.push(['wn','Receptorstatus is beschikbaar vanaf 2005.']);
   if(S.stad.length || S.vars.has('stadium')){
     const ed=[[1989,1992,'TNM 4'],[1993,1998,'TNM 4'],[1999,2002,'TNM 5'],[2003,2009,'TNM 6'],[2010,2016,'TNM 7'],[2017,2025,'TNM 8']];
@@ -335,14 +431,18 @@ function checks(){
   if(S.levering==='record' && S.doel==='statistiek') C.push(['wn','Recordniveau voor statistiek: beperkingen op uitlevering, IKNL overlegt.']);
   if(S.levering==='record' && S.gesl==='beide') C.push(['ok','Geslacht 3 (intersekse) wordt op recordniveau niet geleverd.']);
   if([...S.vars].some(b=>/_zkh$/.test(b)||b==='contact_zkh1'||b==='zkh_patnum')) C.push(['wn','Ziekenhuisvariabelen: herleidbaar naar zorgaanbieders, aanvullende voorwaarden.']);
+  ['I','C'].forEach(g=>(S.ic[g]||[]).forEach(r=>{ if(!ruleCodes(r).length) C.push(['wn',`Groep ${g}: kies een waarde voor ${r.n}.`]); }));
+  const pm=morfCodes(); if(pm.length) ['I','C'].forEach(g=>(S.ic[g]||[]).filter(r=>r.n==='morf').forEach(r=>{ const buiten=ruleCodes(r).filter(c=>!pm.includes(c)); if(buiten.length) C.push(['wn',`Groep ${g}: morfologie ${buiten.join(', ')} valt buiten de populatie.`]); }));
+  if(hasGroups() && !(S.ic.C||[]).some(r=>ruleCodes(r).length)) C.push(['wn','Groep C heeft geen voorwaarden: alle overige patiënten worden de vergelijkingsgroep.']);
   if(!S.vars.size) C.push(['bad','Nog geen data-items gekozen.']);
   if(!C.some(c=>c[0]!=='ok')) C.unshift(['ok','Geen beschikbaarheids- of herleidbaarheidsproblemen gevonden.']);
   return C;
 }
 
+function behText(){ const m=vmap(); const parts=['I','C'].map(g=>{ const rs=(S.ic[g]||[]).filter(r=>m[r.n]&&m[r.n].c==='Behandelgegevens'&&ruleCodes(r).length); return rs.length?`${g}: ${rs.map(ruleText).join(' en ')}`:null; }).filter(Boolean); return parts.join('; '); }
 function selectiecriteria(){
   return [
-    ['Tumor: lokalisatie(s)', S.ds==='__itemset'?'xxx':DS_INFO[S.ds].naam],
+    ['Tumor: lokalisatie(s)', [...dsNamen(), ...(isItem()?['andere tumorsoort (itemset)']:[])].join(' + ')||'xxx'],
     ['Tumor: morfologie(en)', morfCodes().length? morfCodes().map(c=>`${c}${morfLabel(c)?' '+morfLabel(c):''}`).join(' + ') : 'Geen selectie'],
     ['Tumor: stadium/stadia', stadText()||'Geen selectie'],
     ['Tumor: gedrag', gedragText()],
@@ -350,8 +450,8 @@ function selectiecriteria(){
     ['Patiënt: leeftijd (indeling)', leeftText()],
     ['Diagnosejaren/-periode', `${S.jrvan}-${S.jrtot}`],
     ['Niveau van de selectie', 'Landelijk'],
-    ['Behandeling(en)', S.pi && /chir|therap|behandel|radio|chemo|horm/i.test(S.pi) ? S.pi : 'xxx'],
-    ['Overige criteria', [recText(),malText()].filter(Boolean).join('; ')||'xxx']
+    ['Behandeling(en)', behText()||'xxx'],
+    ['Overige criteria', [recText(),malText(),hasGroups()?`groepsindeling I: ${picoText('I')}; C: ${picoText('C')||'overige patiënten'}${S.iconly==='ja'?' (alleen I en C geleverd)':''}`:null].filter(Boolean).join('; ')||'xxx']
   ];
 }
 
@@ -360,13 +460,18 @@ function buildSpec(){
   const {out,skip}=deliveryVars();
   return {
     aanvraag:{nummer:S.nr||null,type:S.type,vorige_aanvraag:S.type==='update'?(S.vorige||null):null,titel:S.titel||null,gebruik:S.doel},
-    vraagtype: (S.pi||S.pc) ? (S.pc?'vergelijkend':'associatie') : 'beschrijvend',
-    dataset:S.ds==='__itemset'?null:S.ds,
-    tumsoort:S.ds==='__itemset'?null:(DS_INFO[S.ds].tumsoort||null),
-    populatie:{tekst:pSentence(),periode:{van:S.jrvan,tm:S.jrtot},geslacht:S.gesl,leeftijd:{min:+S.lmin,max:S.lmax===''?null:+S.lmax},gedrag:S.gedrag,morfologie:morfCodes(),
-      stadium:S.stad.length?{variabele:S.stadvar,groepen:S.stad.map(g=>ROMAN[+g])}:null,receptor:S.ds==='Borst'?S.receptor:null,eerdere_maligniteit_uitsluiten:S.malexcl},
-    pico:{P:pSentence(),I:S.pi||null,C:S.pc||null,O:S.po||null},
+    vraagtype: (hasGroups()||S.pi||S.pc) ? ((S.pc||(S.ic.C||[]).length)?'vergelijkend':'associatie') : 'beschrijvend',
+    datasets:dsList(), andere_tumorsoort_via_itemset:isItem(),
+    tumsoort:dsList().map(d=>DS_INFO[d].tumsoort||null),
+    populatie:{tekst:pSentence(),periode:{van:S.jrvan,tm:S.jrtot},geslacht:{waarde:S.gesl,volgt_uit_tumorsoort:!!fixedSex()},leeftijd:{min:+S.lmin,max:S.lmax===''?null:+S.lmax},gedrag:S.gedrag,morfologie:morfCodes(),
+      stadium:S.stad.length?{variabele:S.stadvar,groepen:S.stad.map(g=>ROMAN[+g])}:null,receptor:(dsList().length===1&&dsList()[0]==='Borst')?S.receptor:null,eerdere_maligniteit_uitsluiten:S.malexcl},
+    pico:{P:pSentence(),
+      I:{naam:S.pi||null,tekst:picoText('I')||null,regels:(S.ic.I||[]).map(r=>({variabele:r.n,waarden:ruleCodes(r).map(c=>({code:c,label:valLabel(r.n,c)}))}))},
+      C:{naam:S.pc||null,tekst:picoText('C')||null,regels:(S.ic.C||[]).map(r=>({variabele:r.n,waarden:ruleCodes(r).map(c=>({code:c,label:valLabel(r.n,c)}))}))},
+      O:{naam:S.po||null,tekst:oText()||null,variabelen:S.out||[]},
+      alleen_I_en_C:hasGroups()?S.iconly==='ja':null},
     levering:S.levering,
+    koppeling:{gewenst:S.koppel,bronnen:S.koppel==='nee'?[]:S.bronnen},
     variabelen:out.map(o=>({sas:o.sas,item:o.item.n,label:o.item.l,categorie:o.item.c,opmerking:o.note||null})),
     niet_geleverd:skip.map(s=>({item:s.item.n,reden:s.reden})),
     aandachtspunten:checks().filter(c=>c[0]!=='ok').map(c=>c[1]),
@@ -375,12 +480,14 @@ function buildSpec(){
 }
 
 function buildPrompt(){
-  const info = S.ds==='__itemset'?{tumsoort:null,kern:null,kernbestand:null,naam:'Andere tumorsoort'}:DS_INFO[S.ds];
+  const DL = dsList(); const meer = DL.length>1;
   const nr = S.nr || '[jj-nnnnn]'; const [jj,nnnnn] = nr.includes('-')?nr.split('-'):['[jj]','[nnnnn]'];
   const {out,skip}=deliveryVars();
-  const ts = info.tumsoort || '[tumsoort-code, TODO analist]';
-  const kern = info.kern || `[%kern-macro voor ${S.ds}, TODO analist]`;
-  const gesl = S.levering==='record' ? ({beide:'gesl in (1,2)',man:'gesl = 1',vrouw:'gesl = 2'}[S.gesl]) : ({beide:'(geen selectie op geslacht)',man:'gesl = 1',vrouw:'gesl = 2'}[S.gesl]);
+  const ts = DL.map(d=>DS_INFO[d].tumsoort || `[tumsoort-code ${d}, TODO analist]`).join(', ') || '[tumsoort-code, TODO analist]';
+  const kern = DL.map(d=>DS_INFO[d].kern || `[%kern-macro voor ${d}, TODO analist]`).join('; ') || '[%kern-macro, TODO analist]';
+  const kernbest = DL.map(d=>DS_INFO[d].kernbestand || `[kernbestand ${d}, TODO analist]`).join(' ');
+  const gesl = fixedSex() ? (S.levering==='record' ? 'gesl in (1,2)  * geen extra selectie op geslacht: volgt uit de tumorsoort' : '(geen selectie op geslacht: volgt uit de tumorsoort)')
+    : S.levering==='record' ? ({beide:'gesl in (1,2)',man:'gesl = 1',vrouw:'gesl = 2'}[S.gesl]) : ({beide:'(geen selectie op geslacht)',man:'gesl = 1',vrouw:'gesl = 2'}[S.gesl]);
   const std = [
     `tumsoort in (${ts})`,'tum_incl in (1)  * tumor binnen inclusiecriteria NKR','nl_incl in (1)  * woonachtig in NL bij diagnose',
     S.doel==='onderzoek'?'ond_gebruik = 1  * gebruik voor wetenschappelijk onderzoek':null,
@@ -396,7 +503,7 @@ function buildPrompt(){
   if(S.malexcl!=='geen') verder.push(`Eerdere maligniteit: %anderemaligniteit(<dataset>, format=W, periode=E, maanden=${S.malexcl==='5j'?'0-60':'0-9999'}, gedrag=3-9, tum_incl=1, regstat=0 1 5); daarna if mal = 0;`);
   const hasSyst = out.some(o=>/^(chemo|horm|target|immuno|syst)_code/.test(o.sas));
   const lmin5 = Math.ceil(((+S.lmin)+1)/5)*5-1;
-  const varlist = ['key_nkr key_eid', ...chunk(out.map(o=>o.sas), 10).map(a=>a.join(' '))].join('\n  ');
+  const varlist = ['key_nkr key_eid'+(meer?' tumsoort':'')+(hasGroups()?' groep':''), ...chunk(out.map(o=>o.sas), 10).map(a=>a.join(' '))].join('\n  ');
   const sc = selectiecriteria();
   const L = [];
   L.push(`Je bent SAS-programmeur bij IKNL. Schrijf een basis-SAS-script voor NKR-gegevensaanvraag ${nr}, volgens de vaste IKNL-structuur hieronder.`);
@@ -410,19 +517,32 @@ function buildPrompt(){
   if(S.type==='update') L.push(`- Dit is een update van aanvraag ${S.vorige||'[eerder nummer]'}. Begin het script met een kort commentaarblok dat de wijzigingen ten opzichte van die aanvraag noemt, en gebruik jroud/nroud van de eerdere aanvraag voor de sleutel (key_seed), zodat sleutels gelijk blijven.`);
   L.push('');
   L.push('Structuur van het script');
-  L.push(`1. Header-commentaar: aanvraag ${nr}, schrijver [analist], aanvrager [aanvrager], titel "${S.titel||'[titel]'}", datum, en één regel "Selectie: ${S.jrvan}-${S.jrtot}, ${(info.naam||'').toLowerCase()}, ${gedragText().toLowerCase()}${mc.length?', morf '+mc.join('/'):''}${stadText()?', '+stadText():''}, ${leeftText()}".`);
+  L.push(`1. Header-commentaar: aanvraag ${nr}, schrijver [analist], aanvrager [aanvrager], titel "${S.titel||'[titel]'}", datum, en één regel "Selectie: ${S.jrvan}-${S.jrtot}, ${dsNamen().join(' + ').toLowerCase()}, ${gedragText().toLowerCase()}${mc.length?', morf '+mc.join('/'):''}${stadText()?', '+stadText():''}, ${leeftText()}".`);
   L.push(`2. %let jr = ${jj}; %let nr = ${nnnnn}; %let dir = ...\\20&jr\\&jr.-&nr; libname dir en libname lever (zoals gebruikelijk).`);
   L.push('3. STANDAARDSELECTIE: sasfile krn.kern load; data tum; set krn.kern; met deze voorwaarden:');
   std.forEach(s=>L.push(`   - ${s}`));
   L.push(`   en daarna %kerntherapie; en ${kern};  sasfile krn.kern close;`);
+  if(meer) L.push(`   Meerdere tumorsoorten (${dsNamen().join(', ')}): neem elk tumorspecifiek kernbestand op. TODO analist: controleer of de kernmacro's samen in één data step kunnen, anders per tumorsoort selecteren en daarna samenvoegen.`);
+  if(isItem()) L.push('   Daarnaast een tumorsoort zonder catalogus-dataset (via itemset): zie de toelichting. TODO analist.');
   L.push('   Gevolgd door een proc freq "eerste impressie" op de kernvariabelen.');
   L.push('4. Verdere selectie, elke stap een eigen data step (tum1, tum2, ...):');
   if(verder.length) verder.forEach(s=>L.push(`   - ${s}`)); else L.push('   - geen aanvullende selectie');
+  if(hasGroups()){
+    const gi=groupSas('I'), gc=groupSas('C');
+    L.push('   - Groepsindeling (PICO), als laatste data step van de selectie:');
+    L.push(`       if ${gi||'0'} then groep = 1;`);
+    L.push(gc?`       else if ${gc} then groep = 0;`:'       else groep = 0;  * C = alle overige patiënten');
+    L.push(`       label groep = "PICO-groep: 1 = ${(S.pi||'interventie').replace(/"/g,"'")}, 0 = ${(S.pc||'vergelijking').replace(/"/g,"'")}";`);
+    if(S.iconly==='ja') L.push('       if groep ne .;  * alleen patiënten in I of C');
+    L.push('     Zet er een proc freq op groep bij ter controle.');
+  }
   L.push('5. Variabelen:');
   if(out.some(o=>o.sas==='leeft_cat')) L.push(`   - %leeft_cat(<dataset>, leeft_cat=5, leeft_min=${(+S.lmin)<=24?24:lmin5}, leeft_plus=85);  /* TODO analist: controleer ondergrens eerste categorie */ met proc freq leeft*leeft_cat ter controle.`);
   if(hasSyst) L.push('   - %kernsystemisch(<dataset>, grp=1, extravars=1); voor de systemische therapiecodes.');
+  if((S.out||[]).length) L.push(`   - Primaire uitkomst${S.po?' ('+S.po+')':''}: ${S.out.join(', ')}. Zorg dat deze in de levering zitten.`);
   if(out.some(o=>/^mal/.test(o.sas)) && S.malexcl!=='geen') L.push('   - Informatie over overige maligniteiten buiten de exclusieperiode: opnieuw %anderemaligniteit met format=L en de complementaire periode, terugkoppelen aan de primaire tumor (TODO analist: controleer).');
   if(S.toel) L.push(`   - Aanvullende wens van de aanvrager (beoordeel en werk uit, of zet als TODO): "${S.toel}"`);
+  if(S.koppel!=='nee') L.push(`   - Koppeling ${S.koppel==='ja'?'gewenst':'mogelijk gewenst'}${S.bronnen.length?' met '+S.bronnen.join(', '):''}. Valt buiten dit basisscript; lever de sleutelvariabelen zoals afgesproken met de koppelpartij (TODO analist).`);
   L.push('6. LEVERINGSBESTAND' + (S.levering==='record'?' op recordniveau':' (geaggregeerd: maak in plaats van een recordbestand een proc tabulate/proc freq volgens de vraag; TODO analist voor de indeling)') + ':');
   if(S.levering==='record'){
     L.push('   - data key met key_nkr, key_zid, key_eid via key_seed (zoals gebruikelijk).');
@@ -433,9 +553,9 @@ function buildPrompt(){
     L.push('   - Ritssluiting bewaren: dir.key_&jr&nr met key_nkr key_zid key_eid rn zid eid epis dwh_release dwh_exportdat.');
   }
   L.push('7. DATA DICTIONARY:');
-  L.push(`   - %let kernbestand = ${info.kernbestand||'[kernbestand, TODO analist]'}; %formatdetail(&kernbestand, sort=D, multilabel=0);`);
+  L.push(`   - %let kernbestand = ${kernbest||'[kernbestand, TODO analist]'};${meer?' /* TODO analist: controleer of meerdere kernbestanden hier samen kunnen */':''} %formatdetail(&kernbestand, sort=D, multilabel=0);`);
   L.push('   - %formatbestand(levering, out=datadict1, kernbest=&kernbestand, format=txt); data datadict2 met eventuele extra formats.');
-  L.push(`   - algemeen_vraagst = "${(S.type==='update'?`Update van dataset ${S.vorige||'[eerder nummer]'}. `:'') + pSentence()}${S.pi?` I: ${S.pi}.`:''}${S.pc?` C: ${S.pc}.`:''}${S.po?` O: ${S.po}.`:''}"`);
+  L.push(`   - algemeen_vraagst = "${(S.type==='update'?`Update van dataset ${S.vorige||'[eerder nummer]'}. `:'') + pSentence()}${picoText('I')?` I: ${picoText('I')}.`:''}${picoText('C')?` C: ${picoText('C')}.`:''}${oText()?` O: ${oText()}.`:''}"`);
   L.push('   - data selectiecriteria met precies deze 10 records, in deze volgorde:');
   sc.forEach(([k,v],i)=>L.push(`     ${i+1}. ${k}: "${v}"`));
   L.push('   - data toelichting_vars: alleen voor afgeleide variabelen (bijv. leeft_cat), anders xxx laten staan.');
@@ -450,7 +570,7 @@ function chunk(a,n){ const r=[]; for(let i=0;i<a.length;i+=n) r.push(a.slice(i,i
 function renderSum(){
   const {out,skip}=deliveryVars(); const C=checks();
   const bycat={}; out.forEach(o=>bycat[o.item.c]=(bycat[o.item.c]||0)+1);
-  const pico=[['P',pSentence()],['I',S.pi],['C',S.pc],['O',S.po]].filter(x=>x[1]);
+  const pico=[['P',pSentence()],['I',picoText('I')],['C',picoText('C')],['O',oText()]].filter(x=>x[1]);
   $('p-sum').innerHTML = `<div class="sum">
     <div><p class="hint" style="font-weight:700;text-transform:uppercase;letter-spacing:.05em">${S.nr?esc(S.nr)+' · ':''}${S.type==='update'?'update van '+esc(S.vorige||'?'):'nieuwe aanvraag'} · ${S.doel==='onderzoek'?'wetenschappelijk onderzoek':'statistiek'}</p>
       <h2 style="margin-top:4px">${esc(S.titel||'Zonder titel')}</h2></div>
@@ -463,7 +583,7 @@ function renderSum(){
   </div>`;
 }
 function renderCount(){
-  const live=[['Tumorsoort',S.ds==='__itemset'?'—':DS_INFO[S.ds].naam,true],['Diagnoseperiode',`${S.jrvan}–${S.jrtot}`,true],['Geslacht',geslText(),true],['Leeftijd',leeftText(),true],['Gedrag',gedragText(),true],
+  const live=[['Tumorsoort',dsNamen().join(', ')||'—',true],['Diagnoseperiode',`${S.jrvan}–${S.jrtot}`,true],['Geslacht',geslText(),true],['Leeftijd',leeftText(),true],['Gedrag',gedragText(),true],
     ['Morfologie',morfCodes().join(', ')||'alle',true],['Stadium',stadText()||'alle',true],['Receptorstatus',recText()||'alle',S.receptor==='alle'],['Eerdere maligniteit',malText()||'niet uitgesloten',S.malexcl==='geen']];
   const partial = live.some(r=>!r[2]);
   $('p-count').innerHTML = `<div class="count">
@@ -483,25 +603,44 @@ function update(){
 document.addEventListener('click', e=>{
   const b=e.target.closest('button'); if(!b) return;
   const g=b.closest('.seg[data-key]');
-  if(g){ S[g.dataset.key]=b.dataset.v; syncSeg(); if(g.dataset.key==='stadvar') renderDsParts(); update(); return; }
+  if(g){ S[g.dataset.key]=b.dataset.v; if(g.dataset.key==='type' && S.type==='nieuw'){ S.vorige=''; $('vorige').value=''; } syncSeg(); if(g.dataset.key==='stadvar') renderDsParts(); update(); return; }
   if(b.dataset.morf){ const c=b.dataset.morf; S.morf=S.morf.includes(c)?S.morf.filter(x=>x!==c):[...S.morf,c]; b.setAttribute('aria-pressed',String(S.morf.includes(c))); update(); return; }
   if(b.dataset.stad){ const c=b.dataset.stad; S.stad=S.stad.includes(c)?S.stad.filter(x=>x!==c):[...S.stad,c].sort(); b.setAttribute('aria-pressed',String(S.stad.includes(c))); update(); return; }
   if(b.getAttribute('role')==='tab'){ document.querySelectorAll('[role=tab]').forEach(t=>{ const on=t===b; t.setAttribute('aria-selected',String(on)); $(t.getAttribute('aria-controls')).hidden=!on; }); return; }
+  if(b.dataset.act==='rm'){ S.ic[b.dataset.g].splice(+b.dataset.i,1); renderICO(); update(); return; }
+  if(b.dataset.act==='val'){ const r=S.ic[b.dataset.g][+b.dataset.i]; const c=b.dataset.c; r.vals=r.vals.includes(c)?r.vals.filter(x=>x!==c):[...r.vals,c];
+    renderICO(); update(); const nb=document.querySelector(`[data-act="val"][data-g="${b.dataset.g}"][data-i="${b.dataset.i}"][data-c="${CSS.escape(c)}"]`); if(nb) nb.focus(); return; }
+  if(b.dataset.act==='orm'){ S.out=S.out.filter(n=>n!==b.dataset.n); renderICO(); update(); return; }
+  if(b.dataset.quick){ const ns=b.dataset.quick.split(' '); const all=ns.every(n=>S.out.includes(n));
+    S.out = all ? S.out.filter(n=>!ns.includes(n)) : [...new Set([...S.out,...ns])]; if(!all) ns.forEach(n=>S.vars.add(n));
+    renderICO(); renderList(); update(); const nb=document.querySelector(`[data-quick="${b.dataset.quick}"]`); if(nb) nb.focus(); return; }
+  if(b.dataset.ds){ const d=b.dataset.ds; const prevFixed=fixedSex();
+    const next=S.dss.includes(d)?S.dss.filter(x=>x!==d):[...S.dss,d];
+    if(!next.length){ toast('Kies minstens één tumorsoort'); return; }
+    S.dss=next; applySex(prevFixed);
+    const m=vmap(); const L=dsList();
+    if(!(L.length===1&&L[0]==='Borst')) S.receptor='alle';
+    S.morf=S.morf.filter(c=>morfLabel(c)); S.stad=S.stad.filter(g=>stageGroups().includes(g));
+    S.vars=new Set([...S.vars].filter(n=>m[n])); S.ic={I:S.ic.I.filter(r=>m[r.n]),C:S.ic.C.filter(r=>m[r.n])}; S.out=S.out.filter(n=>m[n]);
+    renderDsChips(); renderDsParts(); renderICO(); syncSeg(); renderList(); update(); const nb=document.querySelector(`[data-ds="${d}"]`); if(nb) nb.focus(); return; }
+  if(b.dataset.bron){ const x=b.dataset.bron; S.bronnen=S.bronnen.includes(x)?S.bronnen.filter(y=>y!==x):[...S.bronnen,x]; if(S.koppel==='nee') S.koppel='ja'; syncSeg(); update(); const nb=document.querySelector(`[data-bron="${CSS.escape(x)}"]`); if(nb) nb.focus(); return; }
   if(b.id==='alleen-gekozen'){ filt.only=!filt.only; b.setAttribute('aria-pressed',String(filt.only)); renderList(); return; }
   if(b.id==='add-sel'){ const m=vmap(); ['gesl','incjr','leeft','morf','gedrag'].concat(S.stad.length?[S.stadvar]:[]).concat(S.receptor!=='alle'?SEL_VARS.receptor:[]).concat(S.malexcl!=='geen'?['mal']:[]).forEach(n=>{ if(m[n]) S.vars.add(n); }); renderList(); update(); toast('Selectievariabelen toegevoegd'); return; }
-  if(b.id==='btn-voorbeeld'){ S=example(); $('banner').hidden=false; fillForm(); toast('Voorbeeld geladen'); return; }
-  if(b.id==='btn-leeg'){ S=empty(); $('banner').hidden=true; fillForm(); toast('Formulier gewist'); return; }
+  if(b.id==='btn-leeg'){ S=empty(); fillForm(); toast('Formulier gewist'); return; }
   if(b.dataset.copy){ const txt=b.dataset.copy==='prompt'?buildPrompt():JSON.stringify(buildSpec(),null,2); const pre=$(b.dataset.copy==='prompt'?'out-prompt':'out-spec');
     try{ navigator.clipboard.writeText(txt).then(()=>toast('Gekopieerd'),()=>selectPre(pre)); }catch(err){ selectPre(pre); } }
 });
 document.addEventListener('change', e=>{
   const t=e.target;
-  if(t.dataset && t.dataset.var){ t.checked?S.vars.add(t.dataset.var):S.vars.delete(t.dataset.var); const tot=vars().filter(v=>S.vars.has(v.b)).length; $('vcount').textContent=`${tot} van ${CAT[S.ds].length} gekozen`; update(); return; }
-  if(t.id==='ds'){ S.ds=t.value; S.morf=[]; S.stad=[]; if(S.ds!=='Borst') S.receptor='alle'; const m=vmap(); S.vars=new Set([...S.vars].filter(n=>m[n])); renderDsParts(); syncSeg(); renderList(); update(); }
+  if(t.dataset && t.dataset.var){ t.checked?S.vars.add(t.dataset.var):S.vars.delete(t.dataset.var); const tot=vars().filter(v=>S.vars.has(v.b)).length; $('vcount').textContent=`${tot} van ${vars().length} gekozen`; update(); return; }
   if(t.id==='catf'){ filt.cat=t.value; renderList(); }
+  if(t.dataset && t.dataset.add!==undefined && t.value){ const g=t.dataset.add, n=t.value;
+    if(g==='O'){ if(!S.out.includes(n)) S.out.push(n); } else S.ic[g].push({n,vals:[],extra:''});
+    S.vars.add(n); renderICO(); renderList(); update(); const ns=document.querySelector(`select[data-add="${g}"]`); if(ns) ns.focus(); }
 });
 document.addEventListener('input', e=>{
   const t=e.target; const map={vorige:'vorige',titel:'titel',pi:'pi',pc:'pc',po:'po',toel:'toel',aanvraagnr:'nr','morf-extra':'morfExtra'};
+  if(t.dataset && t.dataset.act==='extra'){ S.ic[t.dataset.g][+t.dataset.i].extra=t.value; update(); const gen=$('grp-'+t.dataset.g).querySelector('.gen'); if(gen) gen.innerHTML=`<b>${t.dataset.g}:</b> ${esc(groupText(t.dataset.g))}`; return; }
   if(map[t.id]!==undefined){ S[map[t.id]]=t.value; update(); return; }
   if(['jrvan','jrtot','lmin','lmax'].includes(t.id)){ S[t.id]= t.id==='lmax'&&t.value===''?'':(+t.value||0); update(); return; }
   if(t.id==='zoek'){ filt.q=t.value; renderList(); }
