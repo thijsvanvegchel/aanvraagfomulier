@@ -1,4 +1,4 @@
-"""Bouwt dist/index.html uit src/template.html, data/catalogus.json en config/datasets.json.
+"""Bouwt dist/index.html uit src/template.html, data/catalogus.json, config/datasets.json en config/instellingen.json.
 
 Gebruik:  python scripts/build.py
 Het resultaat is één zelfstandig HTML-bestand zonder server of build-stap aan de kant van de gebruiker.
@@ -26,13 +26,13 @@ def availability(text):
 
 
 def compact(catalogus):
-    """Compacte vorm voor de pagina: [categorie, naam, label, toelichting, noot, waarden, vanaf, tot]."""
+    """Compacte vorm voor de pagina: [categorie, naam, label, toelichting, noot, waarden, vanaf, tot, ingekort]."""
     out = {}
     for ds, items in catalogus.items():
         rows = []
         for x in items:
             van, tot = availability(x["x"])
-            rows.append([x["c"], x["n"], x["l"], x["x"][:260], x["w"], x["v"], van, tot])
+            rows.append([x["c"], x["n"], x["l"], x["x"][:260], x["w"], x["v"], van, tot, bool(x.get("s"))])
         out[ds] = rows
     return out
 
@@ -40,6 +40,7 @@ def compact(catalogus):
 def build():
     cat = json.loads((ROOT / "data" / "catalogus.json").read_text(encoding="utf-8"))
     datasets = json.loads((ROOT / "config" / "datasets.json").read_text(encoding="utf-8"))
+    instellingen = json.loads((ROOT / "config" / "instellingen.json").read_text(encoding="utf-8"))
     missing = set(datasets) - set(cat)
     if missing:
         raise SystemExit(f"Datasets in config maar niet in catalogus: {sorted(missing)}")
@@ -48,6 +49,7 @@ def build():
     for key, value in {
         "/*__DATA__*/": dump(compact(cat)),
         "/*__DATASETS__*/": dump(datasets),
+        "/*__INSTELLINGEN__*/": dump(instellingen),
     }.items():
         if key not in html:
             raise SystemExit(f"Placeholder {key} ontbreekt in src/template.html")
