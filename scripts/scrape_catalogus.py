@@ -52,6 +52,8 @@ def parse(html):
             "x": re.sub(r"\s+", " ", hidden.get_text(" ")).strip() if hidden else "",
             "w": tip.get("data-title", "") if tip else "",
             "v": values,
+            # De catalogus toont bij lange lijsten maar een selectie ("de tabel toont een selectie van 12 waarden").
+            "s": bool(re.search(r"selectie van \d+ waarden", val_td.get_text(" "))),
         })
     return out
 
