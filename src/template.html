@@ -134,7 +134,7 @@ table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-s
     </div>
     <div class="fld" id="fld-morf"><span class="lbl">Morfologie <span class="tok">morf</span></span>
       <div class="seg" id="morf-chips"></div>
-      <p class="hint">Niets gekozen is alle morfologieën. Staat een code er niet bij, dan valt de vraag buiten deze route.</p></div>
+      <p class="hint" id="morf-hint"></p></div>
     <div class="fld" id="fld-stad"><span class="lbl">Stadium <span class="tok">stadium</span></span>
       <div class="seg" id="stad-chips"></div></div>
     <div class="fld"><span class="lbl">Extra selectie</span>
@@ -207,8 +207,8 @@ function vars(){
   const key=S.dss.join('|'); if(_vc.key===key) return _vc.list;
   const m=new Map();
   S.dss.forEach(ds=>CAT[ds].forEach(a=>{ const b=base(a[1]); let v=m.get(b);
-    if(!v){ v={c:a[0],n:a[1],b,l:a[2],x:a[3],w:a[4],v:a[5].slice(),av:a[6],at:a[7],ds:[],per:{}}; m.set(b,v); }
-    else { a[5].forEach(p=>{ if(!v.v.some(q=>q[0]===p[0])) v.v.push(p); }); if(!v.w&&a[4]) v.w=a[4]; }
+    if(!v){ v={c:a[0],n:a[1],b,l:a[2],x:a[3],w:a[4],v:a[5].slice(),av:a[6],at:a[7],s:!!a[8],ds:[],per:{}}; m.set(b,v); }
+    else { a[5].forEach(p=>{ if(!v.v.some(q=>q[0]===p[0])) v.v.push(p); }); if(!v.w&&a[4]) v.w=a[4]; if(a[8]) v.s=true; }
     v.ds.push(ds); v.per[ds]={av:a[6],at:a[7]}; }));
   const list=[...m.values()]; const map={}; list.forEach(v=>map[v.b]=v);
   _vc={key,list,map}; return list;
@@ -259,7 +259,11 @@ function renderPop(){
   const m=vmap();
   const mv=((m.morf&&m.morf.v)||[]).filter(([c])=>c!=='8000');
   $('fld-morf').hidden=!mv.length;
-  $('morf-chips').innerHTML = mv.map(([c,l])=>`<button type="button" class="chip" data-morf="${esc(c)}" aria-pressed="${S.morf.includes(c)}">${esc(c)} ${esc(l)}</button>`).join('');
+  const suf=gedragSuffix();
+  $('morf-chips').innerHTML = `<button type="button" class="chip" data-morf-alle="1" aria-pressed="${!S.morf.length}">Alle morfologieën</button>`
+    + mv.map(([c,l])=>`<button type="button" class="chip" data-morf="${esc(c)}" aria-pressed="${S.morf.includes(c)}">${esc(c)}<span style="font-weight:400">${suf}</span> ${esc(l)}</button>`).join('');
+  $('morf-hint').innerHTML = `De gedragscode achter de morfologie volgt uit <b>Gedrag</b>: /3 is invasief, /2 is in situ. Dezelfde morfologiecode kan beide zijn; 8500/2 is bijvoorbeeld DCIS en 8500/3 invasief ductaal carcinoom.`
+    + (m.morf&&m.morf.s ? ' De catalogus toont hier alleen een selectie van 12 codes. Staat uw code er niet bij, dan valt de vraag buiten deze route.' : '');
   const gs=stageGroups(); $('fld-stad').hidden=!gs.length;
   $('stad-chips').innerHTML = gs.map(g=>`<button type="button" class="chip" data-stad="${g}" aria-pressed="${S.stad.includes(g)}">Stadium ${ROMAN[+g]}</button>`).join('');
 }
@@ -267,7 +271,7 @@ function renderFilters(){
   const m=vmap();
   $('filters').innerHTML = S.filters.map((f,i)=>{ const v=m[f.n]; if(!v) return '';
     return `<div class="filter"><div class="filter-h"><span class="tok">${esc(v.n)}</span><span class="lb">${esc(v.l)}</span><button type="button" class="x" data-rmf="${i}" aria-label="Selectie op ${esc(v.b)} verwijderen">×</button></div>
-      <div class="seg">${v.v.map(([c,l])=>`<button type="button" class="chip" data-fi="${i}" data-c="${esc(c)}" aria-pressed="${f.vals.includes(c)}">${esc(c)} ${esc(l)}</button>`).join('')}</div></div>`; }).join('');
+      <div class="seg">${v.v.map(([c,l])=>`<button type="button" class="chip" data-fi="${i}" data-c="${esc(c)}" aria-pressed="${f.vals.includes(c)}">${esc(c)} ${esc(l)}</button>`).join('')}</div>${v.s?'<p class="hint">De catalogus toont hier een selectie van de waarden.</p>':''}</div>`; }).join('');
   const used=new Set([...POP_VARS,...S.filters.map(f=>f.n)]);
   const vs=vars().filter(v=>v.v.length>1 && !used.has(v.b) && itemStatus(v).route!=='nee');
   $('add-filter').innerHTML = `<option value="">+ Selectie op een catalogusvariabele…</option>` + CATS.map(c=>{ const o=vs.filter(v=>v.c===c); return o.length?`<optgroup label="${c}">${o.map(v=>`<option value="${esc(v.b)}">${esc(v.n)} · ${esc(v.l)}</option>`).join('')}</optgroup>`:''; }).join('');
@@ -293,13 +297,15 @@ function applySex(prevFixed){
   document.querySelectorAll('.seg[data-key="gesl"] button').forEach(b=>{ b.disabled=!!fx && b.dataset.v!==fx; });
   const h=$('gesl-hint'); h.hidden=!fx; h.textContent = fx ? `${S.dss.length>1?'Deze tumorsoorten komen':DS_INFO[S.dss[0]].kanker.replace(/^./,c=>c.toUpperCase())+' komt'} alleen voor bij ${fx==='man'?'mannen':'vrouwen'}.` : '';
 }
+function gedragSuffix(){ return {invasief:'/3',insitu:'/2',beide:'/2 of /3'}[S.gedrag]; }
+function morfIcdo(){ const g={invasief:['3'],insitu:['2'],beide:['2','3']}[S.gedrag]; return S.morf.flatMap(c=>g.map(x=>`${c}/${x}`)); }
 function dsTekst(){ const p=S.dss.map(d=>`${DS_INFO[d].kanker} (${DS_INFO[d].icd})`); return p.length>1?p.slice(0,-1).join(', ')+' of '+p[p.length-1]:p[0]; }
 function leeftText(){ return S.lmax!==''&&S.lmax!=null?`${S.lmin}–${S.lmax} jaar`:`${S.lmin} jaar en ouder`; }
 function pSentence(){
   const wie = S.gesl==='beide'?'Patiënten':S.gesl==='man'?'Mannen':'Vrouwen';
   const ged = {invasief:'invasieve ',insitu:'in-situ ',beide:''}[S.gedrag];
   let t=`${wie} van ${leeftText()} met ${ged}${dsTekst()}, gediagnosticeerd ${S.jrvan}–${S.jrtot}`;
-  if(S.morf.length) t+=`, morfologie ${S.morf.join('/')}`;
+  if(S.morf.length) t+=`, morfologie ${morfIcdo().join(', ')}`;
   if(S.stad.length) t+=`, stadium ${S.stad.map(g=>ROMAN[+g]).join(', ')}`;
   S.filters.filter(f=>f.vals.length).forEach(f=>{ const v=vmap()[f.n]; if(v) t+=`, ${v.l.toLowerCase()}: ${f.vals.map(c=>valLabel(f.n,c)).join(' of ')}`; });
   return t;
@@ -333,7 +339,7 @@ function buildSpec(){
     aanvraag:{titel:S.titel||null, gebruik:S.doel, onderzoeksvraag:S.vraag||null},
     levering:'recordniveau', datasets:S.dss,
     populatie:{tekst:pSentence(), periode:{van:S.jrvan,tm:S.jrtot}, leeftijd:{min:+S.lmin,max:S.lmax===''?null:+S.lmax},
-      geslacht:{waarde:S.gesl,volgt_uit_tumorsoort:!!fixedSex()}, gedrag:S.gedrag, morfologie:S.morf, stadium:S.stad.map(g=>ROMAN[+g]),
+      geslacht:{waarde:S.gesl,volgt_uit_tumorsoort:!!fixedSex()}, gedrag:S.gedrag, morfologie:S.morf.map(c=>({code:c,label:valLabel('morf',c)})), morfologie_icdo:morfIcdo(), stadium:S.stad.map(g=>ROMAN[+g]),
       extra_selectie:S.filters.map(f=>({variabele:f.n, waarden:f.vals.map(c=>({code:c,label:valLabel(f.n,c)}))}))},
     variabelen:chosen().map(v=>{ const st=itemStatus(v); return {item:v.n, levering:st.levering||v.b, label:v.l, categorie:v.c, tumorsoorten:v.ds,
       juridisch:st.route==='let'?st.uitleg:null, toelichting:st.route==='std'&&st.uitleg?st.uitleg:null}; }),
@@ -439,7 +445,7 @@ function refocus(sel){ const el=document.querySelector(sel); if(el) el.focus(); 
 document.addEventListener('click', e=>{
   const b=e.target.closest('button'); if(!b) return;
   const g=b.closest('.seg[data-key]');
-  if(g){ S[g.dataset.key]=b.dataset.v; syncSeg(); update(); return; }
+  if(g){ S[g.dataset.key]=b.dataset.v; syncSeg(); if(g.dataset.key==='gedrag') renderPop(); update(); return; }
   if(b.dataset.ds){ const d=b.dataset.ds; const next=S.dss.includes(d)?S.dss.filter(x=>x!==d):[...S.dss,d];
     if(!next.length){ toast('Kies minstens één tumorsoort'); return; }
     const prevFixed=fixedSex(); S.dss=next; applySex(prevFixed); syncSeg();
@@ -447,7 +453,8 @@ document.addEventListener('click', e=>{
     S.morf=S.morf.filter(c=>mv.includes(c)); S.stad=S.stad.filter(x=>stageGroups().includes(x));
     S.filters=S.filters.filter(f=>m[f.n]); S.vars=new Set([...S.vars].filter(n=>m[n]));
     renderDs(); renderPop(); renderFilters(); renderList(); update(); refocus(`[data-ds="${d}"]`); return; }
-  if(b.dataset.morf){ const c=b.dataset.morf; S.morf=S.morf.includes(c)?S.morf.filter(x=>x!==c):[...S.morf,c]; b.setAttribute('aria-pressed',String(S.morf.includes(c))); update(); return; }
+  if(b.dataset.morfAlle){ S.morf=[]; renderPop(); update(); refocus('[data-morf-alle]'); return; }
+  if(b.dataset.morf){ const c=b.dataset.morf; S.morf=S.morf.includes(c)?S.morf.filter(x=>x!==c):[...S.morf,c]; renderPop(); update(); refocus(`[data-morf="${c}"]`); return; }
   if(b.dataset.stad){ const c=b.dataset.stad; S.stad=S.stad.includes(c)?S.stad.filter(x=>x!==c):[...S.stad,c].sort(); b.setAttribute('aria-pressed',String(S.stad.includes(c))); update(); return; }
   if(b.dataset.fi!==undefined){ const f=S.filters[+b.dataset.fi]; const c=b.dataset.c; f.vals=f.vals.includes(c)?f.vals.filter(x=>x!==c):[...f.vals,c]; b.setAttribute('aria-pressed',String(f.vals.includes(c))); update(); return; }
   if(b.dataset.rmf!==undefined){ S.filters.splice(+b.dataset.rmf,1); renderFilters(); update(); refocus('#add-filter'); return; }
