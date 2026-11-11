@@ -14,7 +14,7 @@ function loadApp() {
     getSelection: () => ({}), navigator: {}, localStorage: { getItem: () => null, setItem() {} },
     setTimeout, clearTimeout, console,
   };
-  const fn = new Function(...Object.keys(sandbox), js + '\n;return {buildSpec, legalCheck, verdict, itemStatus, vmap, pSentence, applySex, empty, setState: s => { S = s; }};');
+  const fn = new Function(...Object.keys(sandbox), js + '\n;return {buildSpec, legalCheck, verdict, itemStatus, vmap, pSentence, applySex, empty, morfIcdo, mailText, mailHtml, mailtoHref, mailSubject, setState: s => { S = s; }};');
   return fn(...Object.values(sandbox));
 }
 
@@ -86,4 +86,38 @@ test('de pagina bevat geen SAS of interne macro\'s', () => {
   for (const w of ['%kern', 'krn.kern', 'SAS', '%anderemaligniteit', '501300']) {
     assert.ok(!html.includes(w), `pagina bevat nog ${w}`);
   }
+});
+
+test('mail bevat titel, onderzoeksvraag en aangevraagde data, en gaat naar de analist', () => {
+  const app = loadApp();
+  app.setState(state(app, { titel: 'Vermoeidheid na chemo', vraag: 'Hoe vaak krijgen patiënten chemotherapie?', vars: new Set(['chemo', 'rt_zkh']) }));
+  const txt = app.mailText();
+  assert.match(txt, /Titel: Vermoeidheid na chemo/);
+  assert.match(txt, /ONDERZOEKSVRAAG\nHoe vaak krijgen patiënten chemotherapie\?/);
+  assert.match(txt, /- chemo: /);
+  assert.match(txt, /rt_zkh.*LET OP/);
+  assert.match(app.mailHtml(), /<h1[^>]*>Vermoeidheid na chemo<\/h1>/);
+  const { href, kort } = app.mailtoHref();
+  assert.ok(href.startsWith('mailto:t.vanvegchel@iknl.nl?subject=NKR-standaardset'));
+  assert.strictEqual(kort, false);
+});
+
+test('lange aanvraag: korte mailtekst, volledige versie via klembord', () => {
+  const app = loadApp();
+  const alle = new Set(app.vmap ? Object.keys(app.vmap()) : []);
+  app.setState(state(app, { vars: alle }));
+  const { href, kort } = app.mailtoHref();
+  assert.strictEqual(kort, true);
+  assert.ok(href.length < 2000);
+});
+
+test('morfologie krijgt de gedragscode uit Gedrag', () => {
+  const app = loadApp();
+  app.setState(state(app, { morf: ['8500'], gedrag: 'invasief' }));
+  assert.deepStrictEqual(app.morfIcdo(), ['8500/3']);
+  assert.match(app.pSentence(), /morfologie 8500\/3/);
+  app.setState(state(app, { morf: ['8500'], gedrag: 'insitu' }));
+  assert.deepStrictEqual(app.buildSpec().populatie.morfologie_icdo, ['8500/2']);
+  app.setState(state(app, { morf: ['8500', '8201'], gedrag: 'beide' }));
+  assert.deepStrictEqual(app.morfIcdo(), ['8500/2', '8500/3', '8201/2', '8201/3']);
 });
