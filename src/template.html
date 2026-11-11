@@ -85,19 +85,25 @@ pre.out{margin:0;padding:14px 16px;background:var(--code-bg);color:var(--code-fg
 table.dim{border-collapse:collapse;width:100%;font-size:14px}
 table.dim th,table.dim td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line-soft);vertical-align:top}
 table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.submit{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.submit-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.submit-done{border-top:1px solid var(--line-soft);padding-top:12px;display:flex;flex-direction:column;gap:10px;font-size:14px}
+.submit-done ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.addr{font:500 14px var(--f-mono);user-select:all;background:var(--tok-bg);color:var(--tok-fg);border-radius:3px;padding:2px 6px}
 .toast{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--brand);color:var(--brand-ink);padding:10px 16px;border-radius:4px;font-weight:700}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
- 
+
 <header class="top"><div class="wrap">
   <div><p class="brand">NKR Standaardset</p>
     <p class="sub">Stel zelf een dataset op recordniveau samen uit de NKR-datacatalogus. Er wordt geen maatwerk gemaakt: de analist toetst alleen of de set juridisch geleverd mag worden.</p></div>
   <button type="button" class="btn ghost" id="btn-leeg">Alles wissen</button>
 </div></header>
- 
+
 <main class="wrap">
 <section class="left" aria-label="Keuzes">
- 
+
   <div class="sec">
     <h2>Aanvraag</h2>
     <div class="fld"><span class="lbl">Gebruik</span>
@@ -107,7 +113,7 @@ table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-s
       <p class="hint">Eén of twee zinnen. De analist toetst of de gevraagde items nodig zijn voor deze vraag.</p>
       <textarea id="vraag" maxlength="400"></textarea></div>
   </div>
- 
+
   <div class="sec">
     <h2>Populatie</h2>
     <div class="fld"><span class="lbl">Tumorsoort(en)</span>
@@ -136,7 +142,7 @@ table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-s
       <div id="filters" style="display:flex;flex-direction:column;gap:10px"></div>
       <select id="add-filter" aria-label="Selectie op een catalogusvariabele toevoegen"></select></div>
   </div>
- 
+
   <div class="sec">
     <h2>Data-items</h2>
     <div class="picker">
@@ -150,7 +156,7 @@ table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-s
     </div>
   </div>
 </section>
- 
+
 <section class="right" aria-label="Overzicht">
   <div class="tabs" role="tablist">
     <button type="button" role="tab" id="t-sum" aria-selected="true" aria-controls="p-sum">Overzicht voor de analist</button>
@@ -160,21 +166,30 @@ table.dim th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-s
   <div class="panel" id="p-spec" role="tabpanel" aria-labelledby="t-spec" hidden>
     <div class="panel-bar"><p>Gestructureerde velden voor Dynamics en PowerBI.</p><button type="button" class="btn" id="copy-spec">Kopieer JSON</button></div>
     <pre class="out" id="out-spec"></pre></div>
+  <div class="panel submit" id="submit-box">
+    <div class="submit-row">
+      <div style="min-width:0;flex:1 1 240px"><p class="lbl" style="margin:0">Aanvraag indienen</p>
+        <p class="hint" id="submit-hint"></p></div>
+      <button type="button" class="btn" id="btn-indienen">Aanvraag indienen</button>
+    </div>
+    <div id="submit-done" class="submit-done" hidden></div>
+  </div>
 </section>
 </main>
 <div class="toast" id="toast" role="status" hidden></div>
- 
+
 <script>
 const CAT = /*__DATA__*/;
 const DS_INFO = /*__DATASETS__*/;
+const INST = /*__INSTELLINGEN__*/;
 const CATS = ['Patiëntgegevens','Tumorgegevens','Procesgegevens','Risicofactoren','Behandelgegevens'];
 // Variabelen die al in de populatie-sectie zitten; niet nog eens als extra selectie aanbieden.
 const POP_VARS = ['topo','topo_sublok','gesl','gedrag','morf','stadium','incjr','iacr'];
- 
+
 const base = n => n.replace(/\s*\[.*?\]\s*/g,'').trim();
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
- 
+
 function empty(){
   return {doel:'onderzoek', titel:'', vraag:'', dss:['Borst'], jrvan:2015, jrtot:2024, lmin:18, lmax:'',
     gesl:'beide', gedrag:'invasief', morf:[], stad:[], filters:[], vars:new Set()};
@@ -185,7 +200,7 @@ function load(){ try{ const r=JSON.parse(localStorage.getItem(KEY)||'null'); if(
   const s={...empty(),...r,vars:new Set(r.vars||[])}; s.dss=(s.dss||[]).filter(d=>CAT[d]); if(!s.dss.length) s.dss=['Borst']; return s; }catch(e){ return null; } }
 let S = load() || empty();
 let filt = {q:'', cat:'', only:false};
- 
+
 /* ---------- catalogus ---------- */
 let _vc={key:null,list:null,map:null};
 function vars(){
@@ -200,7 +215,7 @@ function vars(){
 }
 function vmap(){ vars(); return _vc.map; }
 function valLabel(n,c){ const v=vmap()[n]; const f=v&&v.v.find(x=>x[0]===c); return f?f[1]:c; }
- 
+
 /* Hoe een item geleverd wordt, op basis van de noot in de catalogus.
    route: 'std' = standaard, 'let' = juridisch letten op, 'nee' = niet in deze route. */
 function itemStatus(v){
@@ -222,7 +237,7 @@ function intervalTwin(v){
   const m=vmap(); const cands=[v.b.replace(/dat$/,'int'), v.b.replace(/_dat$/,'_int'), v.b.replace(/dat(\d)$/,'int$1'), v.b.replace(/startdat/,'start_int'), v.b.replace(/stopdat/,'stop_int')];
   return cands.find(c=>c!==v.b && m[c]) || null;
 }
- 
+
 /* ---------- formulier ---------- */
 function fillForm(){
   ['titel','vraag'].forEach(k=>$(k).value=S[k]);
@@ -269,7 +284,7 @@ function renderList(){
   countLine();
 }
 function countLine(){ $('vcount').textContent=`${chosen().length} van ${vars().filter(v=>itemStatus(v).route!=='nee').length} gekozen`; }
- 
+
 /* ---------- afleiden ---------- */
 function chosen(){ const m=vmap(); return [...S.vars].map(n=>m[n]).filter(v=>v && itemStatus(v).route!=='nee'); }
 function fixedSex(){ const g=S.dss.map(d=>DS_INFO[d].geslacht||null); return g.length&&g.every(x=>x&&x===g[0])?g[0]:null; }
@@ -343,8 +358,82 @@ function renderSum(){
     </tbody></table></div></div>`:''}
   </div>`;
 }
-function update(){ save(); renderSum(); $('out-spec').textContent=JSON.stringify(buildSpec(),null,2); }
- 
+/* ---------- indienen ---------- */
+function mailSubject(){ return `NKR-standaardset: ${S.titel||'zonder titel'}`; }
+function mailText(){
+  const spec=buildSpec(); const L=[];
+  L.push(`Aanvraag NKR-standaardset`, '');
+  L.push(`Titel: ${S.titel||'-'}`, `Gebruik: ${S.doel==='onderzoek'?'wetenschappelijk onderzoek':'statistiek'}`, `Levering: recordniveau`, `Status: ${spec.status}`, '');
+  L.push('ONDERZOEKSVRAAG', S.vraag||'-', '');
+  L.push('POPULATIE', pSentence(), '');
+  L.push(`AANGEVRAAGDE DATA (${spec.variabelen.length} items)`);
+  spec.variabelen.forEach(v=>L.push(`- ${v.item}: ${v.label}${v.levering!==base(v.item)?` [geleverd als ${v.levering}]`:''}${v.juridisch?' [LET OP: '+v.juridisch+']':''}`));
+  if(spec.aandachtspunten.length){ L.push('', 'AANDACHTSPUNTEN'); spec.aandachtspunten.forEach(a=>L.push(`- ${a.tekst}`)); }
+  L.push('', 'Samengesteld met de NKR Standaardset uit de NKR-datacatalogus.');
+  return L.join('\n');
+}
+function mailHtml(){
+  const spec=buildSpec(); const [cls]=verdict(legalCheck());
+  const kleur={ok:'#1E5E3A',wn:'#5C3A00',bad:'#8A1F12'}[cls], bg={ok:'#E3F2E8',wn:'#FFF4DD',bad:'#FDE7E4'}[cls];
+  const td='style="padding:6px 8px;border-bottom:1px solid #DCEBF0;vertical-align:top"';
+  const th='style="padding:6px 8px;border-bottom:2px solid #B3D3DD;text-align:left;font-size:12px;color:#4F6B75;text-transform:uppercase"';
+  const h='style="color:#006D8C;font-size:16px;margin:20px 0 6px"';
+  return `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#1B3A47;max-width:720px">
+<p style="color:#006D8C;font-size:12px;font-weight:bold;text-transform:uppercase;letter-spacing:.05em;margin:0">Aanvraag NKR-standaardset</p>
+<h1 style="color:#006D8C;font-size:22px;margin:4px 0 8px">${esc(S.titel||'Zonder titel')}</h1>
+<p style="margin:0 0 12px;color:#4F6B75">${S.doel==='onderzoek'?'Wetenschappelijk onderzoek':'Statistiek'} · recordniveau · ${spec.variabelen.length} data-items</p>
+<p style="background:${bg};color:${kleur};padding:8px 12px;border-radius:4px;margin:0"><b>${esc(spec.status)}</b></p>
+<h2 ${h}>Onderzoeksvraag</h2><p style="margin:0">${esc(S.vraag||'-')}</p>
+<h2 ${h}>Populatie</h2><p style="margin:0">${esc(pSentence())}</p>
+<h2 ${h}>Aangevraagde data</h2>
+<table style="border-collapse:collapse;width:100%;font-size:13px"><thead><tr><th ${th}>Item</th><th ${th}>Label</th><th ${th}>Categorie</th><th ${th}>Levering</th></tr></thead><tbody>
+${spec.variabelen.map(v=>`<tr><td ${td}><code>${esc(v.item)}</code></td><td ${td}>${esc(v.label)}</td><td ${td}>${esc(v.categorie)}</td><td ${td}>${v.juridisch?`<span style="color:#5C3A00"><b>Let op:</b> ${esc(v.juridisch)}</span>`:esc(v.toelichting||'standaard')}</td></tr>`).join('')}
+</tbody></table>
+${spec.aandachtspunten.length?`<h2 ${h}>Aandachtspunten</h2><ul style="margin:0;padding-left:20px">${spec.aandachtspunten.map(a=>`<li>${esc(a.tekst)}</li>`).join('')}</ul>`:''}
+<p style="margin:20px 0 0;color:#4F6B75;font-size:12px">Samengesteld met de NKR Standaardset uit de NKR-datacatalogus. De specificatie in JSON staat hieronder.</p>
+<pre style="font-size:11px;background:#F3F8FA;padding:10px;white-space:pre-wrap">${esc(JSON.stringify(spec,null,1))}</pre>
+</div>`;
+}
+// Mailprogramma's kappen een lange mailto-link af; daarboven sturen we een korte tekst en zit de volledige mail op het klembord.
+const MAILTO_MAX = 1800;
+function mailtoHref(){
+  const subj=encodeURIComponent(mailSubject());
+  let body=encodeURIComponent(mailText());
+  const kort = body.length > MAILTO_MAX;
+  if(kort) body=encodeURIComponent(`Aanvraag NKR-standaardset: ${S.titel||''}\n\nDe volledige aanvraag staat op uw klembord. Plak die hieronder met Ctrl+V (Cmd+V op Mac).\n\n`);
+  return {href:`mailto:${INST.analist_email}?subject=${subj}&body=${body}`, kort};
+}
+function renderSubmit(){
+  const bad=legalCheck().some(r=>r[0]==='bad');
+  $('btn-indienen').disabled=bad;
+  $('submit-hint').innerHTML = bad ? 'Los eerst de rode punten in het overzicht op.' : `Gaat naar <span class="addr">${esc(INST.analist_email)}</span>, met titel, onderzoeksvraag, populatie en de aangevraagde data.`;
+}
+async function copyMail(){
+  const html=mailHtml(), txt=mailText();
+  try{ await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([txt],{type:'text/plain'})})]); return true; }
+  catch(e){ try{ await navigator.clipboard.writeText(txt); return true; }catch(e2){ return false; } }
+}
+async function indienen(){
+  if(legalCheck().some(r=>r[0]==='bad')) return;
+  const box=$('submit-done');
+  if(INST.verzend_url){
+    try{ const r=await fetch(INST.verzend_url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({aan:INST.analist_email,onderwerp:mailSubject(),html:mailHtml(),tekst:mailText(),specificatie:buildSpec()})});
+      if(!r.ok) throw new Error(r.status);
+      box.hidden=false; box.innerHTML=`<p style="margin:0"><span class="pill ok">Verzonden</span> De aanvraag is verstuurd naar <span class="addr">${esc(INST.analist_email)}</span>.</p>`; return;
+    }catch(e){ /* val terug op het mailprogramma */ }
+  }
+  const copied=await copyMail(); const {href,kort}=mailtoHref();
+  box.hidden=false;
+  box.innerHTML = `<p style="margin:0"><b>Uw mailprogramma opent met een mail aan de analist.</b> Opent er niets, gebruik dan de knop hieronder.</p>
+    <ol>${kort?`<li>De aanvraag is te lang voor een automatisch ingevulde mail. ${copied?'De volledige, opgemaakte aanvraag staat op uw klembord: plak die in de mail.':'Kopieer de aanvraag met de knop hieronder en plak die in de mail.'}</li>`
+      :`<li>De mail is al ingevuld.${copied?' Wilt u de opgemaakte versie? Vervang de tekst door wat op uw klembord staat.':''}</li>`}
+      <li>Controleer de mail en klik in uw mailprogramma op <b>Verzenden</b>.</li></ol>
+    <div class="seg"><a class="btn" style="display:inline-flex;align-items:center;text-decoration:none" href="${esc(href)}">Open mail opnieuw</a><button type="button" class="btn ghost" id="btn-kopieer-mail">Kopieer opgemaakte aanvraag</button></div>
+    <p class="hint">Adres: <span class="addr">${esc(INST.analist_email)}</span> · Onderwerp: ${esc(mailSubject())}</p>`;
+  location.href=href;
+}
+function update(){ save(); renderSum(); renderSubmit(); $('submit-done').hidden=true; $('out-spec').textContent=JSON.stringify(buildSpec(),null,2); }
+
 /* ---------- events ---------- */
 function refocus(sel){ const el=document.querySelector(sel); if(el) el.focus(); }
 document.addEventListener('click', e=>{
@@ -365,6 +454,8 @@ document.addEventListener('click', e=>{
   if(b.getAttribute('role')==='tab'){ document.querySelectorAll('[role=tab]').forEach(t=>{ const on=t===b; t.setAttribute('aria-selected',String(on)); $(t.getAttribute('aria-controls')).hidden=!on; }); return; }
   if(b.id==='alleen-gekozen'){ filt.only=!filt.only; b.setAttribute('aria-pressed',String(filt.only)); renderList(); return; }
   if(b.id==='btn-leeg'){ S=empty(); fillForm(); toast('Formulier gewist'); return; }
+  if(b.id==='btn-indienen'){ indienen(); return; }
+  if(b.id==='btn-kopieer-mail'){ copyMail().then(ok=>toast(ok?'Opgemaakte aanvraag gekopieerd':'Kopiëren lukte niet; selecteer de tekst in de specificatie')); return; }
   if(b.id==='copy-spec'){ const txt=JSON.stringify(buildSpec(),null,2);
     try{ navigator.clipboard.writeText(txt).then(()=>toast('Gekopieerd'),()=>selectPre()); }catch(err){ selectPre(); } }
 });
@@ -384,5 +475,3 @@ function selectPre(){ const r=document.createRange(); r.selectNodeContents($('ou
 let tt; function toast(m){ const el=$('toast'); el.textContent=m; el.hidden=false; clearTimeout(tt); tt=setTimeout(()=>el.hidden=true,1800); }
 fillForm();
 </script>
- 
-Claude is klaar met het antwoord
