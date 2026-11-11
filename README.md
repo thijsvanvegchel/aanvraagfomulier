@@ -1,39 +1,65 @@
-# Roadmap en open punten
+# NKR Standaardset
 
-## Bevindingen uit voorbeeld 26-01697
+Een webpagina waarmee een onderzoeker zelf een eenvoudige NKR-dataset op recordniveau samenstelt,
+uitsluitend uit wat in de [NKR-datacatalogus](https://iknl.nl/NKR-datacatalogus) staat.
 
-- 64 van de 66 geleverde variabelen hebben in de catalogus exact dezelfde naam als in het SAS-script.
-  De `%let variabelen`-lijst kan dus rechtstreeks uit de keuzes van de aanvrager komen.
-- `leeft_cat` is afgeleid van `leeft` (via `%leeft_cat`); dat regelt de generator.
-- `horm_stop_int` wordt wel geleverd, maar staat niet in de catalogus.
-- Morfologiecode 8520 (lobulair) ontbreekt in de waardelijst `morf` van dataset Borst.
-- Het script maakt oksel-echo leeg voor diagnoses vóór 2014; de catalogus noemt hetzelfde jaar.
-  Zulke beschikbaarheidsregels kunnen al in het formulier worden gemeld.
+Bedoeld voor vragen die verder gaan dan [NKR Cijfers](https://iknl.nl/nkr-cijfers), maar geen maatwerk
+nodig hebben. Er wordt geen script geschreven: de analist toetst alleen of de set juridisch geleverd mag worden.
 
-## Kort
+De pagina maakt live:
 
-- [x] Meerdere tumorsoorten in één aanvraag; per variabele zichtbaar in welke tumorsoorten hij bestaat.
-- [x] Koppeling met andere bronnen (o.a. PROFIEL voor vermoeidheid en kwaliteit van leven).
-- [ ] Per tumorsoort aparte selectie op morfologie en stadium (nu één selectie voor alle gekozen tumorsoorten).
+- een **overzicht voor de analist**: populatie, gevraagde items, en aandachtspunten voor de juridische toets;
+- een **specificatie** in JSON, bedoeld voor Microsoft Dynamics en PowerBI.
 
-- [ ] `tumsoort`, `kern` en `kernbestand` invullen voor de 9 datasets naast Borst (`config/datasets.json`).
-- [ ] Catalogus aanvullen: `horm_stop_int`, volledige waardelijst `morf`.
-- [ ] Vaste delen van het SAS-script (header, libnames, standaardselectie, sleutels, export, data dictionary)
-      als sjabloon genereren, zonder taalmodel. De prompt alleen voor afgeleide variabelen en aanvullende wensen.
-- [ ] Twee of drie geanonimiseerde voorbeeldscripts toevoegen per tumorsoort.
-- [ ] Geaggregeerde levering uitwerken (nu alleen een TODO in de prompt).
+## Wat wel en niet in deze route past
 
-## Middellang
+| Wel | Niet (gebruik het gewone aanvraagformulier) |
+|---|---|
+| Tumorsoorten met een catalogus-dataset, ook meerdere tegelijk | Tumorsoorten zonder catalogus-dataset |
+| Selectie op periode, leeftijd, geslacht, gedrag, morfologie, stadium | Morfologiecodes die niet in de catalogus staan |
+| Extra selectie op elke catalogusvariabele met een waardelijst | Afgeleide variabelen, groepsindelingen |
+| Items uit de catalogus, op recordniveau | Projectitems, items "in overleg", geaggregeerde tabellen |
+| | Koppeling met andere bronnen (zoals PROFIEL) |
 
-- [ ] Grove telling: vooraf berekende tabel per DWH-release (tumorsoort × incidentiejaar × geslacht ×
-      leeftijdscategorie × gedrag × stadiumgroep × morfologiegroep), afgerond op 50, kleine aantallen als "< 50".
-      Nagaan of NKR Cijfers deze telling al heeft.
-- [ ] Specificatie-JSON koppelen aan het bestaande formulier en Dynamics (velden vastleggen).
-- [ ] Itemsets als tabel beschikbaar maken, zodat ook tumorsoorten zonder catalogus-dataset gekozen kunnen worden.
+De juridische check volgt de herleidbaarheidsnoten uit de catalogus:
 
-## Klantportaal
+- **standaard**: geleverd zoals het in de catalogus staat; datums automatisch als interval, leeftijd in 5-jaarscategorieën;
+- **let op**: ziekenhuisvariabelen, postcode (regio), datums zonder interval;
+- **niet in deze route**: items die niet worden uitgeleverd of alleen in overleg (bijv. `zkh_patnum`, projectitems).
 
-- [ ] Inloggen: stap 1 overslaan voor terugkerende aanvragers.
-- [ ] Update van een eerdere aanvraag: kies de aanvraag en toon alleen het verschil (bijv. "+ morf 8500").
-- [ ] Vragen en antwoorden met de analist in het portaal, met versies van de specificatie.
-- [ ] Status per fase met verwachte datum; data dictionary al vóór levering inzien.
+## Snel starten
+
+```bash
+pip install -r requirements.txt
+python scripts/build.py          # bouwt dist/index.html
+node --test tests/*.test.js
+```
+
+Open daarna `dist/index.html` in een browser. Er is geen server nodig.
+
+## Mappen
+
+| Map | Inhoud |
+|---|---|
+| `src/template.html` | De pagina: opmaak, formulier en logica. |
+| `data/catalogus.json` | Alle variabelen uit de catalogus (10 datasets), één per regel. |
+| `config/datasets.json` | Per dataset: naam, ICD-codes en (waar van toepassing) het geslacht. |
+| `scripts/scrape_catalogus.py` | Haalt de catalogus opnieuw op en schrijft `data/catalogus.json`. |
+| `scripts/build.py` | Voegt template, catalogus en config samen tot `dist/index.html`. |
+| `tests/` | Tests, met een lokale kopie van de catalogus (Borst). |
+| `docs/roadmap.md` | Open punten. |
+
+## Catalogus bijwerken
+
+```bash
+python scripts/scrape_catalogus.py
+python scripts/build.py
+```
+
+Controleer de diff van `data/catalogus.json` in je pull request: zo zie je welke items erbij of af zijn gegaan.
+Nieuwe items komen vanzelf in de pagina. De juridische check werkt op de noten die de catalogus zelf meegeeft.
+
+## Privacy
+
+De pagina bevat geen patiëntgegevens en stuurt niets naar een server. Concepten worden alleen in de
+browser van de gebruiker bewaard (`localStorage`).
