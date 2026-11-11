@@ -1,4 +1,4 @@
-"""Bouwt dist/index.html uit src/template.html, data/catalogus.json en config/*.json.
+"""Bouwt dist/index.html uit src/template.html, data/catalogus.json en config/datasets.json.
 
 Gebruik:  python scripts/build.py
 Het resultaat is één zelfstandig HTML-bestand zonder server of build-stap aan de kant van de gebruiker.
@@ -40,7 +40,6 @@ def compact(catalogus):
 def build():
     cat = json.loads((ROOT / "data" / "catalogus.json").read_text(encoding="utf-8"))
     datasets = json.loads((ROOT / "config" / "datasets.json").read_text(encoding="utf-8"))
-    itemsets = json.loads((ROOT / "config" / "itemsets.json").read_text(encoding="utf-8"))
     missing = set(datasets) - set(cat)
     if missing:
         raise SystemExit(f"Datasets in config maar niet in catalogus: {sorted(missing)}")
@@ -49,7 +48,6 @@ def build():
     for key, value in {
         "/*__DATA__*/": dump(compact(cat)),
         "/*__DATASETS__*/": dump(datasets),
-        "/*__ITEMSETS__*/": dump([[i["naam"], i["url"]] for i in itemsets]),
     }.items():
         if key not in html:
             raise SystemExit(f"Placeholder {key} ontbreekt in src/template.html")
